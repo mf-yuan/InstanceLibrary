@@ -1,0 +1,4 @@
+[group_test]
+url = ${url}
+username = ${username}
+password =${password}
