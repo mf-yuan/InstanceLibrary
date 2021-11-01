@@ -11,12 +11,6 @@
 
     <dependencies>
         <!--JSON-->
-        <dependency>
-            <groupId>net.sf.json-lib</groupId>
-            <artifactId>json-lib</artifactId>
-            <version>2.3</version>
-            <classifier>jdk15</classifier>
-        </dependency>
 
         <!--POI-->
         <dependency>
@@ -25,10 +19,18 @@
             <version>3.15</version>
         </dependency>
 
+
+
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.76</version>
         </dependency>
 
         <dependency>
