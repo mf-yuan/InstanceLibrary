@@ -7,6 +7,7 @@ import javax.persistence.Table;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class TableBuilder {
 
     /**
-     * //TODO 根据全类名生成建表语句
+     * 根据全类名生成建表语句
      *
      * @param className
      * @param dbType
@@ -34,7 +35,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 根据Model对象生成建表语句
+     * 根据Model对象生成建表语句
      *
      * @param model  需要生成表的Model对象
      * @param dbType 数据库的类型
@@ -47,7 +48,7 @@ public class TableBuilder {
         String result = "";
         switch (dbType) {
             case MySQL:
-                result = createMySQLTableSQL(model);
+                result = createMySQLTableSQL(model, true);
                 break;
             case Oracle:
                 result = createOracleTableSQL(model);
@@ -60,7 +61,7 @@ public class TableBuilder {
 
 
     /**
-     * //TODO 生成MySQL类型的建表语句
+     * 生成MySQL类型的建表语句
      *
      * @param model
      * @return java.lang.String
@@ -68,7 +69,7 @@ public class TableBuilder {
      * @author yuanmengfan
      * @date 2022/7/12 22:03
      */
-    private String createMySQLTableSQL(Class<?> model) {
+    private String createMySQLTableSQL(Class<?> model, boolean isSuper) {
         // model不能为空
         Objects.requireNonNull(model, "MODEL MUST NOT NULL");
 
@@ -81,7 +82,7 @@ public class TableBuilder {
         // 表名
         String tableName = getTableName(model);
         // 主体内容
-        String context = getMySQLModelContext(model);
+        String context = getMySQLModelContext(model, isSuper);
 
         sql.append("-- START CREATE TABLE ").append(tableName).append("\n");
 
@@ -97,7 +98,7 @@ public class TableBuilder {
 
         getFields(model, false).stream().forEach(field -> {
             try {
-                sql.append(createMySQLTableSQL(Class.forName(GenericsUtil.getGenericsTypeByFiledAndIndex(field, 0))));
+                sql.append(createMySQLTableSQL(Class.forName(GenericsUtil.getGenericsTypeByFiledAndIndex(field, 0)), false));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -106,7 +107,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 根据model对象中的扩张属性来处理，有哪些字段？是什么样类型？是什么样的约束条件？并生成对应的Sql
+     * 根据model对象中的扩展属性来处理，有哪些字段？是什么样类型？是什么样的约束条件？并生成对应的Sql
      *
      * @param model
      * @return java.lang.String
@@ -114,65 +115,65 @@ public class TableBuilder {
      * @author yuanmengfan
      * @date 2022/7/12 22:10
      */
-    private String getMySQLModelContext(Class<?> model) {
+    private String getMySQLModelContext(Class<?> model, boolean isSuper) {
         List<Field> declaredFields = getFields(model, true);
         StringBuffer context = new StringBuffer();
         declaredFields.stream()
+                .filter(field -> !(isSuper && field.getName().equals("pid") && field.getDeclaringClass() == CommonModel.class ))
                 .forEach(field -> {
-                    // 根据对应的字段类型与数据库类型获取匹配的FieldToColumnType
-                    FieldToColumnType columnTypeByField = FieldToColumnType.getColumnTypeByField(field.getType().getName(), DbType.MySQL);
+            // 根据对应的字段类型与数据库类型获取匹配的FieldToColumnType
+            FieldToColumnType columnTypeByField = FieldToColumnType.getColumnTypeByField(field.getType().getName(), DbType.MySQL);
+            // 字段名
+            String fieldName = field.getName();
+            // 数据库列类型
+            String columnType = columnTypeByField.getColumnType();
+            // 字段类型长度
+            String columnLength = StrUtil.isBlank(columnTypeByField.getColumnLength()) ?
+                    "" : String.format("(%s)", columnTypeByField.getColumnLength());
+            // 字段是否为主键
+            boolean idPresent = false;
+            // 字段是否不能为NULL
+            boolean isNotNull = false;
+            // 字段默认值
+            String defaultValue = "";
+            // 数据库字段注释
+            String columnRemark = "";
 
-                    // 字段名
-                    String fieldName = field.getName();
-                    // 数据库列类型
-                    String columnType = columnTypeByField.getColumnType();
-                    // 字段类型长度
-                    String columnLength = StrUtil.isBlank(columnTypeByField.getColumnLength()) ?
-                            "" : String.format("(%s)", columnTypeByField.getColumnLength());
-                    // 字段是否为主键
-                    boolean idPresent = false;
-                    // 字段是否不能为NULL
-                    boolean isNotNull = false;
-                    // 字段默认值
-                    String defaultValue = "";
-                    // 数据库字段注释
-                    String columnRemark = "";
-
-                    // 判断该字段是否有扩展属性的这个注解 如果有个话 针对每个字段进行特殊处理
-                    TableExtension extension = field.getAnnotation(TableExtension.class);
-                    if (extension != null) {
-                        // 扩展属性的 isNotNull 为true 时defaultValue不能为 DefaultValues.NULL
-                        if (extension.isNotNull() && extension.defaultValue().equals(DefaultValues.NULL))
-                            throw new RuntimeException("Table " + model.getSimpleName() + " Field " + fieldName +
-                                    "! When Extension IsNotNull are true, DefaultValue cannot be DefaultValues.NULL.");
-                        fieldName = StrUtil.isNotBlank(extension.columnName()) ? extension.columnName() : fieldName;
-                        columnLength = extension.length() == Integer.MIN_VALUE ?
-                                columnLength : String.format("(%s)", extension.length());
-                        idPresent = extension.isId();
-                        isNotNull = extension.isNotNull();
-                        // 可自定义默认值
-                        defaultValue = getDefaultValue(extension.defaultValue());
-                        columnRemark = extension.remark();
-                    }
-                    context.append("\t")
-                            .append(" `").append(fieldName).append("` ")
-                            .append(columnType)
-                            .append(columnLength)
-                            // 该字段是主键的话添加 PRIMARY KEY这个关键字
-                            .append(idPresent ? " PRIMARY KEY" : "")
-                            // 该字段如果不为NULL添加 NOT NULL这个关键字
-                            .append(isNotNull ? " NOT NULL" : "")
-                            .append(StrUtil.isBlank(defaultValue) ? "" : (" DEFAULT " + defaultValue))
-                            .append(" COMMENT '").append(columnRemark).append("'")
-                            // 判断是否为最后一个字段 做最后一个逗号的处理
-                            .append(field == declaredFields.get(declaredFields.size() - 1) ? "" : ",")
-                            .append("\n");
-                });
+            // 判断该字段是否有扩展属性的这个注解 如果有个话 针对每个字段进行特殊处理
+            TableExtension extension = field.getAnnotation(TableExtension.class);
+            if (extension != null) {
+                // 扩展属性的 isNotNull 为true 时defaultValue不能为 DefaultValues.NULL
+                if (extension.isNotNull() && extension.defaultValue().equals(DefaultValues.NULL))
+                    throw new RuntimeException("Table " + model.getSimpleName() + " Field " + fieldName +
+                            "! When Extension IsNotNull are true, DefaultValue cannot be DefaultValues.NULL.");
+                fieldName = StrUtil.isNotBlank(extension.columnName()) ? extension.columnName() : fieldName;
+                columnLength = extension.length() == Integer.MIN_VALUE ?
+                        columnLength : String.format("(%s)", extension.length());
+                idPresent = extension.isId();
+                isNotNull = extension.isNotNull();
+                // 可自定义默认值
+                defaultValue = getDefaultValue(extension.defaultValue());
+                columnRemark = extension.remark();
+            }
+            context.append("\t")
+                    .append(" `").append(fieldName).append("` ")
+                    .append(columnType)
+                    .append(columnLength)
+                    // 该字段是主键的话添加 PRIMARY KEY这个关键字
+                    .append(idPresent ? " PRIMARY KEY" : "")
+                    // 该字段如果不为NULL添加 NOT NULL这个关键字
+                    .append(isNotNull ? " NOT NULL" : "")
+                    .append(StrUtil.isBlank(defaultValue) ? "" : (" DEFAULT " + defaultValue))
+                    .append(" COMMENT '").append(columnRemark).append("'")
+                    // 判断是否为最后一个字段 做最后一个逗号的处理
+                    .append(field == declaredFields.get(declaredFields.size() - 1) ? "" : ",")
+                    .append("\n");
+        });
         return context.toString();
     }
 
     /**
-     * //TODO 生成Oracle类型的建表语句
+     * 生成Oracle类型的建表语句
      *
      * @param model
      * @return java.lang.String
@@ -221,7 +222,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 根据model对象中的扩张属性来处理，有哪些字段？是什么样类型？是什么样的约束条件？并生成对应的Sql
+     * 根据model对象中的扩张属性来处理，有哪些字段？是什么样类型？是什么样的约束条件？并生成对应的Sql
      * 由于Oracle跟MySQL的建表语句有一些细节的差异 所有封装的方法就分开写了 怕之后不好扩展
      *
      * @param model
@@ -278,7 +279,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 生成添加Oracle注释的语句
+     * 生成添加Oracle注释的语句
      *
      * @param model
      * @param tableName
@@ -309,7 +310,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 处理特殊的默认值
+     * 处理特殊的默认值
      *
      * @param defaultValue
      * @return java.lang.String
@@ -332,7 +333,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 根据Model类获取生成的表名
+     * 根据Model类获取生成的表名
      *
      * @param model Model对象
      * @return java.lang.String
@@ -353,7 +354,7 @@ public class TableBuilder {
     }
 
     /**
-     * //TODO 根据field生成字段名
+     * 根据field生成字段名
      *
      * @return java.lang.String
      * @title getTableName
@@ -369,14 +370,38 @@ public class TableBuilder {
         return fieldName;
     }
 
+    /**
+     * 拿到model对象的所有字段
+     *
+     * @param clazz   model对象
+     * @param satisfy 是否满足 filterFieldPredicate()这个条件
+     * @return java.util.List<java.lang.reflect.Field>
+     * @title getFields
+     * @author yuanmengfan
+     * @date 2022/7/17 20:23
+     */
     public static List<Field> getFields(Class<?> clazz, boolean satisfy) {
-        return Arrays.stream(clazz.getDeclaredFields()).filter(satisfy ? filterFieldPredicate() : Predicate.not(filterFieldPredicate())).collect(Collectors.toList());
+        List<Field> result = null;
+        if (satisfy) {
+            result = Arrays.stream(clazz.getDeclaredFields())
+                    .filter(filterFieldPredicate())
+                    .collect(Collectors.toList());
+
+            List<String> collect = result.stream().map(TableBuilder::getFieldName).collect(Collectors.toList());
+
+            result.addAll(Arrays.stream(CommonModel.class.getDeclaredFields())
+                    .filter(field -> !collect.contains(field.getName())).collect(Collectors.toList()));
+        } else {
+            result = Arrays.stream(clazz.getDeclaredFields())
+                    .filter(Predicate.not(filterFieldPredicate()))
+                    .collect(Collectors.toList());
+        }
+        return result;
     }
 
     public static Predicate<Field> filterFieldPredicate() {
         return field -> !field.getType().getName().endsWith("List");
     }
-
 
     public static void main(String[] args) throws SQLException {
 //        String db_setting = "db/db.setting";

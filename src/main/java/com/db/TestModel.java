@@ -1,5 +1,6 @@
 package com.db;
 
+import com.model.YFSYQKZXJCZFXXList;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.lang.NonNull;
@@ -42,6 +43,6 @@ public class TestModel {
 
     private LocalTime localTime;
 
-    private List<Date> list;
+    private List<YFSYQKZXJCZFXXList> list;
 
 }
