@@ -3,10 +3,8 @@ package com.db;
 import com.model.YFSYQKZXJCZFXXList;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.Table;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,7 +22,7 @@ import java.util.List;
 @Table(name = "t_testModel")
 @TableExtension(remark = "测试表")
 public class TestModel {
-    @TableExtension(isId = true)
+    @TableExtension(isId = true,length = 3000)
     private String id;
     @TableExtension(columnName = "userName",defaultValue = "name1", remark = "姓名")
     private String name;
