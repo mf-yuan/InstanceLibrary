@@ -1,10 +1,10 @@
 package com.db.build.sql.oracle;
 
 import cn.hutool.core.util.StrUtil;
-import com.db.ColumnExtension;
 import com.db.DbType;
 import com.db.DefaultValues;
 import com.db.FieldToColumnType;
+import com.db.annotation.ColumnExtension;
 import com.db.build.sql.ContextBuilder;
 import com.db.util.ModelToTableUtils;
 

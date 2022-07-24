@@ -1,9 +1,9 @@
 package com.db.build.sql.oracle;
 
 import cn.hutool.core.util.StrUtil;
-import com.db.ColumnExtension;
-import com.db.TableExtension;
 import com.db.TestModel;
+import com.db.annotation.ColumnExtension;
+import com.db.annotation.TableExtension;
 import com.db.build.field.BaseFieldBuilder;
 import com.db.build.field.ExtensionFieldBuilder;
 import com.db.build.field.FieldBuilder;

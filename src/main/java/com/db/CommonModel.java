@@ -1,5 +1,7 @@
 package com.db;
 
+import com.db.annotation.ColumnExtension;
+
 import java.util.Date;
 
 /**

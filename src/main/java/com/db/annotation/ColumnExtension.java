@@ -1,5 +1,7 @@
-package com.db;
+package com.db.annotation;
 
+
+import com.db.DefaultValues;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

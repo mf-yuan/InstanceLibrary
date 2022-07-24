@@ -1,9 +1,9 @@
 package com.db.util;
 
 import cn.hutool.core.util.StrUtil;
-import com.db.ColumnExtension;
 import com.db.DefaultValues;
-import com.db.TableExtension;
+import com.db.annotation.ColumnExtension;
+import com.db.annotation.TableExtension;
 
 import java.lang.reflect.Field;
 
