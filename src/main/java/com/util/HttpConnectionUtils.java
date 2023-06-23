@@ -3,6 +3,7 @@ package com.util;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.log.Log;
+import org.springframework.util.StopWatch;
 
 import java.util.Map;
 
@@ -92,14 +93,15 @@ public class HttpConnectionUtils {
     }
 
     private static String getHttpRequest(HttpRequest request){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         log.info("请求URL： "+ request.getUrl());
         log.info("请求头： "+ request.headers());
         log.info("请求参数： "+ request.form());
-        long start = System.currentTimeMillis();
         String body = request.execute().body();
-        long end = System.currentTimeMillis();
-        log.info("耗时： "+ (end - start) +"毫秒" );
+        stopWatch.stop();
         log.info("请求结果： "+ body );
+        log.info("耗时： "+ stopWatch.getLastTaskTimeMillis() +"毫秒" );
         return body;
     }
 }
