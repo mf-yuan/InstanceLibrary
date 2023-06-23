@@ -19,10 +19,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TableExtension {
 
-    // 自定义的列名
+    // 自定义的表名
     String name() default "";
 
-    // 字段的注释
+    // 表注释
     String remark() default "";
 
 
