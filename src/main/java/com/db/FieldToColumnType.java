@@ -75,13 +75,21 @@ public enum FieldToColumnType {
     ORACLE_TIMESTAMP_COLUMN_TYPE("java.sql.TIMESTAMP", "TIMESTAMP", "", DbType.MySQL),
     DEFAULT_ORACLE_UNKNOWN_TYPE("String", "VARCHAR2", "1000", DbType.Oracle);
 
-    // Model对象属性的类型
+    /**
+     *  Model对象属性的类型
+     */
     private final String fieldType;
-    // 数据库中列的类型 有些字段类型是可以没有长度的
+    /**
+     *  数据库中列的类型 有些字段类型是可以没有长度的
+     */
     private final String columnType;
-    // 数据库中列的长 或 精度
+    /**
+     *  数据库中列的长 或 精度
+     */
     private final String columnLength;
-    // 数据库类型
+    /**
+     *  数据库类型
+     */
     private final DbType dbType;
 
     FieldToColumnType(String fieldType, String columnType, String columnLength, DbType dbType) {
@@ -110,10 +118,7 @@ public enum FieldToColumnType {
         Optional<FieldToColumnType> first = getFieldToColumnTypesByDbType(dbType).stream()
                 .filter((map) -> fieldType.equals(map.getFieldType())).findFirst();
         // 如果没有找到合适的类型直接返回该数据库类型中默认的类型
-        if (first.isEmpty()) {
-            return defaultTypeByDbType(dbType);
-        }
-        return first.get();
+        return first.orElseGet(() -> defaultTypeByDbType(dbType));
     }
 
     /**

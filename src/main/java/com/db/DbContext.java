@@ -24,10 +24,10 @@ public class DbContext {
     private static final Logger logger = LoggerFactory.getLogger(DbContext.class);
 
 
-    Db db;
-    Session session;
+    public Db db;
+    public Session session;
 
-    SqlUtils sqlUtils = new SqlUtils();
+    private SqlUtils sqlUtils = new SqlUtils();
 
     public int executeNoQuery(SqlEntity sqlEntity) throws SQLException {
         return db.execute(sqlEntity.getSql(), sqlEntity.getParams());
@@ -50,11 +50,11 @@ public class DbContext {
     }
 
     public  List<Entity> getTableMeta(String schema,String tableName) throws SQLException {
-        return db.query("select `TABLE_SCHEMA`,`TABLE_NAME`,`TABLE_TYPE`,`ENGINE`,`TABLE_COMMENT` from `TABLES` where TABLE_TYPE = 'BASE TABLE' and TABLE_SCHEMA = ?   and TABLE_NAME like ?",schema,tableName);
+        return db.query("select * from information_schema.`COLUMNS` where  TABLE_SCHEMA = ?  and TABLE_NAME = ?",schema,tableName);
     }
 
     public  List<Entity> getTableAll(String schema,String tableName) throws SQLException {
-        return db.query("select `TABLE_SCHEMA`,`TABLE_NAME`,`TABLE_COMMENT` from `TABLES` where TABLE_TYPE = 'BASE TABLE' and TABLE_SCHEMA = ?   and TABLE_NAME like ? group by TABLE_SCHEMA,TABLE_NAME",schema,tableName);
+        return db.query("select `TABLE_SCHEMA`,`TABLE_NAME`,`TABLE_COMMENT` from information_schema.`TABLES` where TABLE_TYPE = 'BASE TABLE' and TABLE_SCHEMA = ?   and TABLE_NAME like ? group by TABLE_SCHEMA,TABLE_NAME",schema,tableName);
     }
 
 
