@@ -45,6 +45,10 @@ public class HttpConnectionUtils {
         return getHttpRequest(HttpUtil.createGet(url).addHeaders(headers).form(params));
     }
 
+    public static String doGet(String url,String  body){
+        return getHttpRequest(HttpUtil.createGet(url).body(body));
+    }
+
     /**
      * 不带请求头与请求参数的POST请求
      * @param url 请求地址
@@ -65,14 +69,26 @@ public class HttpConnectionUtils {
     }
 
     /**
-     * 带请求头与请求参数的GET请求
+     * 带请求参数与请求体的POST请求
+     * @param url 请求地址
+     * @param body 请求体
+     *     1. 标准参数，例如 a=1&b=2 这种格式
+     * 	   2. Rest模式，此时body需要传入一个JSON或者XML字符串，Hutool会自动绑定其对应的Content-Type
+     * @return
+     */
+    public static String doPost(String url,String  body){
+        return getHttpRequest(HttpUtil.createPost(url).body(body));
+    }
+
+    /**
+     * 带请求头与请求参数的POST请求
      * @param url 请求地址
      * @param headers 请求头
      * @param params 请求参数
      * @return
      */
     public static String doPost(String url, Map<String,String> headers, Map<String,Object> params){
-        return getHttpRequest(HttpUtil.createPost( url).addHeaders(headers).form(params));
+        return getHttpRequest(HttpUtil.createPost(url).addHeaders(headers).form(params));
     }
 
     private static String getHttpRequest(HttpRequest request){
