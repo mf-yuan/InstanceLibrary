@@ -15,9 +15,9 @@ import java.util.Date;
  * @date 2022/3/26 10:09 下午
  * @description
  */
-public class TemporalDateTimeUtils extends TemporalAccessorUtil {
+public class TemporalDateTimeUtils extends TemporalAccessorUtils {
     /**
-     * //TODO 获取10位时间戳
+     * 获取10位时间戳
      * @param temporalAccessor
      * @return java.lang.Long
      * @title getEpochSecond
@@ -29,7 +29,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获取13位时间戳
+     * 获取13位时间戳
      * @param temporalAccessor 时间对象
      * @return java.lang.Long
      * @title getEpochMilli
@@ -41,7 +41,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 13位时间戳到本地日期时间
+     * 13位时间戳到本地日期时间
      * @param timestamp
      * @return java.time.LocalDateTime
      * @title timestampToLocalDateTime
@@ -53,7 +53,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 10位时间戳到本地日期时间
+     * 10位时间戳到本地日期时间
      * @param timestamp
      * @return java.time.LocalDateTime
      * @title unixTimestampToLocalDateTime
@@ -65,7 +65,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获取一天最开始的的时间
+     * 获取一天最开始的的时间
      * @param localDate
      * @return java.time.LocalDateTime
      * @title getStartDateTime
@@ -77,7 +77,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获取这一天最后的
+     * 获取这一天最后的
      * @param localDate
      * @return java.time.LocalDateTime
      * @title getEndDateTime
@@ -89,7 +89,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获取今天是几号
+     * 获取今天是几号
      * @title getNowDayOfYear
      * @return int
      * @author yuanmengfan
@@ -100,7 +100,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 今天是哪一年
+     * 今天是哪一年
      * @title getNowYear
      * @return int
      * @author yuanmengfan
@@ -111,7 +111,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 今天是几月
+     * 今天是几月
      * @title getNowMonth
      * @return int
      * @author yuanmengfan
@@ -122,7 +122,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前月第几个星期
+     * 当前月第几个星期
      * @title weekOfMonth
      * @param localDate
      * @return int
@@ -134,7 +134,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前年第几个星期
+     * 当前年第几个星期
      * @title weekOfYear
      * @param localDate
      * @return int
@@ -146,7 +146,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前年第几天
+     * 当前年第几天
      * @title dayOfYear
      * @param localDate
      * @return int
@@ -158,7 +158,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前年第几月
+     * 当前年第几月
      * @title dayOfWeekValue
      * @param localDate
      * @return int
@@ -169,7 +169,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return localDate.getDayOfWeek().getValue();
     }
     /**
-     * //TODO 当前年第几月 {@link DayOfWeek}
+     * 当前年第几月 {@link DayOfWeek}
      * @title dayOfWeekValue
      * @param localDate
      * @return int
@@ -181,7 +181,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 是上午吗 00:00:00为上午 12:00:00为下午
+     * 是上午吗 00:00:00为上午 12:00:00为下午
      * @title isMorning
      * @param localTime
      * @return boolean
@@ -192,7 +192,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return localTime.get(ChronoField.AMPM_OF_DAY) == 0;
     }
     /**
-     * //TODO 是下午吗 00:00:00为上午 12:00:00为下午
+     * 是下午吗 00:00:00为上午 12:00:00为下午
      * @title isMorning
      * @param localTime
      * @return boolean
@@ -204,7 +204,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前年的季度
+     * 当前年的季度
      * @title getQuarter
      * @param localDate
      * @return int
@@ -216,7 +216,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 当前年的季度字符串 返回样例 202201
+     * 当前年的季度字符串 返回样例 202201
      * @title getQuarterAndYear
      * @param localDate
      * @return java.lang.String
@@ -228,7 +228,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 指定日期的某个字段为最开始的时间
+     * 指定日期的某个字段为最开始的时间
      * 例 2022-02-27 12:12:12 ChronoUnit.DayOfMonth
      * 得到2022-02-01 12:12:12
      * @title getBeginDateValue
@@ -242,7 +242,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return localDateTime.with(temporalField,temporalField.range().getMinimum());
     }
     /**
-     * //TODO 指定日期的某个字段为最结束的时间 支持动态的月份
+     * 指定日期的某个字段为最结束的时间 支持动态的月份
      * 例 2022-02-27 12:12:12 ChronoUnit.DayOfMonth
      * 得到2022-02-01 12:12:12
      * @title getBeginDateValue
@@ -260,7 +260,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获得当前日期指定 temporalField 的开始时间 包括子字段
+     * 获得当前日期指定 temporalField 的开始时间 包括子字段
      * 例1、LocalDateTime = now() TemporalField = DateFiled.Day
      *      2022-03-29 13:50:00 置换后为 2022-03-01 00:00:00
      * 例2、LocalDateTime = now() DateFiled = DateFiled.Mon
@@ -302,7 +302,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 获得两个日期之间的某个字段的差值
+     * 获得两个日期之间的某个字段的差值
      * @title between
      * @param start 开始时间
      * @param end   结束时间
@@ -320,7 +320,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between;
     }
     /**
-     * //TODO  获得两个日期之间的某个字段的差值  结果为正数
+     *  获得两个日期之间的某个字段的差值  结果为正数
      * @title between
      * @param start 开始时间
      * @param end   结束时间
@@ -333,7 +333,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return Math.abs(temporalUnit.between(start, end));
     }
     /**
-     * //TODO  获得两个日期之间的相差多少年
+     *  获得两个日期之间的相差多少年
      * @title betweenOfYears
      * @param start 开始时间
      * @param end   结束时间
@@ -345,7 +345,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.YEARS);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少月
+     *  获得两个日期之间的相差多少月
      * @title betweenOfMonths
      * @param start 开始时间
      * @param end   结束时间
@@ -357,7 +357,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.MONTHS);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少天
+     *  获得两个日期之间的相差多少天
      * @title betweenOfDays
      * @param start 开始时间
      * @param end   结束时间
@@ -369,7 +369,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.DAYS);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少小时
+     *  获得两个日期之间的相差多少小时
      * @title betweenOfHours
      * @param start 开始时间
      * @param end   结束时间
@@ -381,7 +381,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.HOURS);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少分钟
+     *  获得两个日期之间的相差多少分钟
      * @title betweenOfMinutes
      * @param start 开始时间
      * @param end   结束时间
@@ -393,7 +393,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.MINUTES);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少秒
+     *  获得两个日期之间的相差多少秒
      * @title betweenOfSeconds
      * @param start 开始时间
      * @param end   结束时间
@@ -405,7 +405,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.SECONDS);
     }
     /**
-     * //TODO  获得两个日期之间的相差多少毫秒
+     *  获得两个日期之间的相差多少毫秒
      * @title betweenOfSeconds
      * @param start 开始时间
      * @param end   结束时间
@@ -417,7 +417,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return between(start,end,ChronoUnit.MILLIS);
     }
     /**
-     * //TODO  获得纪元时间到现在某个字段的差值
+     *  获得纪元时间到现在某个字段的差值
      * @title getEpochToNow
      * @param dateTime 开始时间
      * @return long
@@ -429,7 +429,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 将时间对象已默认的字符串形式返回 yyyy-MM-dd HH:mm:ss
+     * 将时间对象已默认的字符串形式返回 yyyy-MM-dd HH:mm:ss
      * @title format
      * @param temporalAccessor
      * @return java.lang.String
@@ -440,7 +440,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toLocalDateTime(temporalAccessor).format(getDateTimeFormatter(DateFormat.DEFAULT_STANDARD_DATE_PATTERN));
     }
     /**
-     * //TODO 将Date对象已默认的字符串形式返回 yyyy-MM-dd HH:mm:ss
+     * 将Date对象已默认的字符串形式返回 yyyy-MM-dd HH:mm:ss
      * @title format
      * @param date
      * @return java.lang.String
@@ -452,7 +452,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 将时间对象已自定义（patten）的字符串形式返回
+     * 将时间对象已自定义（patten）的字符串形式返回
      * @title format
      * @param temporalAccessor
      * @param pattern
@@ -464,7 +464,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toLocalDateTime(temporalAccessor).format(getDateTimeFormatter(pattern));
     }
     /**
-     * //TODO 将Date对象已自定义（patten）的字符串形式返回
+     * 将Date对象已自定义（patten）的字符串形式返回
      * @title format
      * @param date
      * @param pattern
@@ -476,7 +476,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toLocalDateTime(date).format(getDateTimeFormatter(pattern));
     }
     /**
-     * //TODO 将时间对象已自定义（DateFormat）的字符串形式返回
+     * 将时间对象已自定义（DateFormat）的字符串形式返回
      * @title format
      * @param temporalAccessor
      * @param dateFormat
@@ -488,7 +488,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toLocalDateTime(temporalAccessor).format(getDateTimeFormatter(dateFormat));
     }
     /**
-     * //TODO 将Date对象已自定义（DateFormat）的字符串形式返回
+     * 将Date对象已自定义（DateFormat）的字符串形式返回
      * @title format
      * @param date
      * @param dateFormat
@@ -501,7 +501,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO {@link String} 转 {@link LocalDateTime}
+     * {@link String} 转 {@link LocalDateTime}
      * @title parse
      * @param dateStr 日期字符串
      * @param pattern 格式化字符串
@@ -513,7 +513,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
        return toLocalDateTime(getDateTimeFormatter(pattern).parse(dateStr));
     }
     /**
-     * //TODO {@link String} 转 {@link LocalDateTime} 根据 {@see DateFormat} 来转换
+     * {@link String} 转 {@link LocalDateTime} 根据 {@see DateFormat} 来转换
      * @title parse
      * @param dateStr 日期字符串
      * @param pattern 格式化字符串
@@ -525,7 +525,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toLocalDateTime(getDateTimeFormatter(pattern).parse(dateStr));
     }
     /**
-     * //TODO {@link String} 转 {@link LocalDateTime} 默认格式化字符串为 "yyyy-MM-dd HH:mm:ss"
+     * {@link String} 转 {@link LocalDateTime} 默认格式化字符串为 "yyyy-MM-dd HH:mm:ss"
      * {@code DateFormat.DEFAULT_STANDARD_DATE_PATTERN}
      * @title parse
      * @param dateStr 日期字符串
@@ -537,7 +537,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return parse(dateStr,DateFormat.DEFAULT_STANDARD_DATE_PATTERN);
     }
     /**
-     * //TODO {@link String} 转 {@link Date}
+     * {@link String} 转 {@link Date}
      * @title parseDate
      * @param dateStr 日期字符串
      * @param pattern 格式化字符串
@@ -549,7 +549,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toDate(getDateTimeFormatter(pattern).parse(dateStr));
     }
     /**
-     * //TODO {@link String} 转 {@link Date}
+     * {@link String} 转 {@link Date}
      * @title parseDate
      * @param dateStr 日期字符串
      * @param pattern 格式化字符串
@@ -561,7 +561,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return toDate(getDateTimeFormatter(pattern).parse(dateStr));
     }
     /**
-     * //TODO {@link String} 转 {@link Date} 默认格式化字符串为 "yyyy-MM-dd HH:mm:ss"
+     * {@link String} 转 {@link Date} 默认格式化字符串为 "yyyy-MM-dd HH:mm:ss"
      * {@code DateFormat.DEFAULT_STANDARD_DATE_PATTERN}
      * @title parseDate
      * @param dateStr 日期字符串
@@ -574,7 +574,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
     }
 
     /**
-     * //TODO 通过patten字符串创建一个DateTimeFormatter 对象
+     * 通过patten字符串创建一个DateTimeFormatter 对象
      * @title getDateTimeFormatter
      * @param pattern
      * @return java.time.format.DateTimeFormatter
@@ -585,7 +585,7 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
         return new DateTimeFormatterBuilder().appendPattern(pattern).toFormatter();
     }
     /**
-     * //TODO 通过DateFormat字符串创建一个DateTimeFormatter 对象
+     * 通过DateFormat字符串创建一个DateTimeFormatter 对象
      * @title getDateTimeFormatter
      * @param dateFormat
      * @return java.time.format.DateTimeFormatter
@@ -594,5 +594,13 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtil {
      */
     private static DateTimeFormatter getDateTimeFormatter(DateFormat dateFormat){
         return getDateTimeFormatter(dateFormat.getFormat());
+    }
+
+
+    public static <T extends TemporalAccessor> boolean isBetween(T target,T start,T end){
+        return  getEpochMilli(target) >=  getEpochMilli(start) && getEpochMilli(target) <=  getEpochMilli(end);
+    }
+    public static  <T extends TemporalAccessor> boolean isBeyond(T target,T start,T end){
+        return !isBetween(target,start, end);
     }
 }

@@ -11,7 +11,7 @@ import java.util.Date;
  * @date 2022/3/27 5:01 下午
  * @description
  */
-public class TemporalAccessorUtil {
+public class TemporalAccessorUtils {
 
     /**
      * //TODO {@link TemporalAccessor}转换为 {@link Instant}对象
