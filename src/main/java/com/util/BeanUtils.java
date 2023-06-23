@@ -8,7 +8,6 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -21,19 +20,21 @@ import java.util.*;
  * Map To Java Object
  */
 @Slf4j
-public class BeanUtils implements Serializable {
+public class BeanUtils {
 
     /**
      * 对象转换为Map
+     *
      * @param obj
      * @return
      */
     public static Map<String, Object> toMap(Object obj) {
-       return  toMap( obj, ConverterOptions.builder().build());
+        return toMap(obj, ConverterOptions.builder().build());
     }
 
     /**
      * 对象转换为Map
+     *
      * @param obj
      * @param converterOptions 可选地设置项
      * @return
@@ -46,14 +47,14 @@ public class BeanUtils implements Serializable {
         Field[] fields = obj.getClass().getDeclaredFields();
         Map<String, Object> result = new HashMap<>(fields.length);
         if (converterOptions != null) {
-            fields = Arrays.stream(fields).filter(field ->{
+            fields = Arrays.stream(fields).filter(field -> {
                 // 是否开启忽略常量
-                if(converterOptions.isIgnoreConstants() && Modifier.isFinal(field.getModifiers())){
+                if (converterOptions.isIgnoreConstants() && Modifier.isFinal(field.getModifiers())) {
                     return false;
                 }
 
                 // 是否开启忽略静态变量
-                if(converterOptions.isIgnoreStatic() && Modifier.isStatic(field.getModifiers())){
+                if (converterOptions.isIgnoreStatic() && Modifier.isStatic(field.getModifiers())) {
                     return false;
                 }
                 return true;
@@ -73,7 +74,7 @@ public class BeanUtils implements Serializable {
                 Object value = field.get(obj);
                 result.put(name, value);
             } catch (IllegalAccessException e) {
-                log.warn("Get "+ name +" Field Exception occurred", e);
+                log.warn("Get " + name + " Field Exception occurred", e);
             }
         }
         return result;
@@ -81,27 +82,28 @@ public class BeanUtils implements Serializable {
 
     /**
      * map 转换为 bean
+     *
      * @param map
      * @param targetClass 目标对象类型
-     * @param ignoreCase 是否忽略大小写
+     * @param ignoreCase  是否忽略大小写
      * @return
      */
-    public static <T> T toBean(Map<String, Object> map, Class<T> targetClass,boolean ignoreCase) {
+    public static <T> T toBean(Map<String, Object> map, Class<T> targetClass, boolean ignoreCase) {
         T result = null;
         try {
             result = targetClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             // 可能因为某种情况创建失败
-            log.warn("Not Constructors " +targetClass.getTypeName(),e);
+            log.warn("Not Constructors " + targetClass.getTypeName(), e);
             return null;
         }
 
-        if (map == null || map.isEmpty() ) {
+        if (map == null || map.isEmpty()) {
             return result;
         }
 
         // 如果忽略大写些则使用CaseInsensitiveMap
-        if(ignoreCase){
+        if (ignoreCase) {
             map = new CaseInsensitiveMap<>(map);
         }
 
@@ -117,31 +119,36 @@ public class BeanUtils implements Serializable {
             try {
                 field.set(result, value);
             } catch (IllegalAccessException e) {
-                log.warn("Set "+ name +" Field Exception occurred",e);
+                log.warn("Set " + name + " Field Exception occurred", e);
             }
         }
         return result;
     }
+
     /**
      * 不忽略大小写 map 转换为 bean
+     *
      * @param map
      * @param targetClass 目标对象类型
      * @return
      */
     public static <T> T toBean(Map<String, Object> map, Class<T> targetClass) {
-        return toBean(map,targetClass,false);
+        return toBean(map, targetClass, false);
     }
 
 
     /**
      * 将obj类的属性copy值target中
+     *
      * @param obj
      * @param target 目标对象
      */
-    public static void copyProperties(Object obj, Object target) {
-        Map<String, PropertyDescriptor> targetPropertyDescriptorMap = getPropertyDescriptorMap(target.getClass());
+    public static void copyProperties(Object obj, Object target, boolean ignoreCase) {
+        Map<String, PropertyDescriptor> targetPropertyDescriptorMap = ignoreCase ?
+                new CaseInsensitiveMap<>(getPropertyDescriptorMap(target.getClass())) : getPropertyDescriptorMap(target.getClass());
+        Map<String, PropertyDescriptor> readPropertyDescriptorMap = ignoreCase ?
+                new CaseInsensitiveMap<>(getPropertyDescriptorMap(obj.getClass())) : getPropertyDescriptorMap(obj.getClass());
 
-        Map<String, PropertyDescriptor> readPropertyDescriptorMap = getPropertyDescriptorMap(obj.getClass());
 
         targetPropertyDescriptorMap.values()
                 .stream()
@@ -162,9 +169,13 @@ public class BeanUtils implements Serializable {
                         readPropertyDescriptor.getReadMethod().invoke(obj);
                         propertyDescriptor.getWriteMethod().invoke(target, value);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        log.warn("Copy "+ propertyDescriptor.getName() +" Field Exception occurred",e);
+                        log.warn("Copy " + propertyDescriptor.getName() + " Field Exception occurred", e);
                     }
                 });
+    }
+
+    public static void copyProperties(Object obj, Object target) {
+        copyProperties(obj, target, false);
     }
 
 
@@ -181,7 +192,7 @@ public class BeanUtils implements Serializable {
                     .filter(property -> !"class".equals(property.getName()) && !"serialVersionUID".equals(property.getName()))
                     .toArray(PropertyDescriptor[]::new);
         } catch (IntrospectionException e) {
-            log.warn("Get Property Fail",e);
+            log.warn("Get Property Fail", e);
         }
         return null;
     }
@@ -207,6 +218,7 @@ public class BeanUtils implements Serializable {
 
     /**
      * 获取转换后的值
+     *
      * @param obj
      * @param targetClass
      * @param <T>
@@ -219,6 +231,7 @@ public class BeanUtils implements Serializable {
 
     /**
      * 根据目标类型获取到合适的转换器
+     *
      * @param targetClass 目标类型
      * @return
      */
