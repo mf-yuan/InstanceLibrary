@@ -109,6 +109,8 @@ public class SqlUtils {
                     case "updateDate":
                         entity.set(field.getName(), LocalDateTime.now());
                         break;
+                    default:
+                        break;
                 }
             } else {
                 setFieldValue(entity, field, obj);

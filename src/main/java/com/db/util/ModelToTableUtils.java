@@ -1,7 +1,7 @@
 package com.db.util;
 
 import cn.hutool.core.util.StrUtil;
-import com.db.DefaultValues;
+import com.constants.DefaultValueConstants;
 import com.db.annotation.ColumnExtension;
 import com.db.annotation.TableExtension;
 
@@ -26,11 +26,11 @@ public class ModelToTableUtils {
     public static String getDefaultValue(String defaultValue) {
         if (StrUtil.isBlank(defaultValue)) return "";
         switch (defaultValue) {
-            case DefaultValues.NULL:
-            case DefaultValues.EMPTY_STRING:
-            case DefaultValues.NULL_STRING:
-            case DefaultValues.TRUE:
-            case DefaultValues.FALSE:
+            case DefaultValueConstants.NULL:
+            case DefaultValueConstants.EMPTY_STRING:
+            case DefaultValueConstants.NULL_STRING:
+            case DefaultValueConstants.TRUE:
+            case DefaultValueConstants.FALSE:
                 return defaultValue;
             default:
                 return "'" + defaultValue + "'";
