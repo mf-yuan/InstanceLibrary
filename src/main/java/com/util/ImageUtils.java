@@ -42,53 +42,37 @@ public class ImageUtils {
         }
     }
 
-    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType,float quality) {
+    private static void machineImage(String imagePath, String toCompressImagePath, ImageType toImageType, Integer width, Integer height, Float quality) {
         BufferedImage bufferedImage = getBufferedImage(imagePath);
         if (bufferedImage == null) {
-            return;
+            throw new RuntimeException("Not Load "+imagePath+" Image");
+        }
+        if(toImageType == null){
+            toImageType  = getImageType(imagePath);
         }
 
-        String type = toImageType.getType();
-        BufferedImage toCompressBufferedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(),BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = toCompressBufferedImage.getGraphics();
-        graphics.drawImage(bufferedImage,0,0,null);
-        graphics.dispose();
-
-        ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(type).next();
-        ImageWriteParam param = imageWriter.getDefaultWriteParam();
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionType(param.getCompressionTypes()[0]);
-        param.setCompressionQuality(quality);
-
-
-        try (FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(toCompressImagePath + "." + type))) {
-            imageWriter.setOutput(fileImageOutputStream);
-            imageWriter.write(null, new javax.imageio.IIOImage(toCompressBufferedImage, null, null), param);
-            imageWriter.dispose();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BufferedImage drawImageDoneBufferedImage = getDrawImageDoneBufferedImage(bufferedImage,toImageType,width,height);
+        write(drawImageDoneBufferedImage,toCompressImagePath,toImageType,quality);
     }
 
-
+    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Float quality) {
+        machineImage(imagePath, toCompressImagePath, toImageType,null,null, quality);
+    }
+    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Integer width, Integer height) {
+        machineImage(imagePath, toCompressImagePath, toImageType,width,height, null);
+    }
     public static void convertImage(String imagePath, String toCompressImagePath, ImageType toImageType) {
-        BufferedImage bufferedImage = getBufferedImage(imagePath);
-        if (bufferedImage == null) {
-            return;
-        }
-
-        String type = toImageType.getType();
-        BufferedImage toCompressBufferedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(),BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = toCompressBufferedImage.getGraphics();
-        graphics.drawImage(bufferedImage,0,0,null);
-        graphics.dispose();
-
-        try {
-            ImageIO.write(toCompressBufferedImage,type,new File(toCompressImagePath+"."+type));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        machineImage(imagePath, toCompressImagePath, toImageType,null,null, null);
     }
+
+    public static void convertImage(String imagePath, String toCompressImagePath, Integer width, Integer height) {
+        machineImage(imagePath, toCompressImagePath, null,width,height, null);
+    }
+
+    public static void convertImage(String imagePath, String toCompressImagePath, Float quality) {
+        machineImage(imagePath, toCompressImagePath, null,null,null, quality);
+    }
+
 
     public static BufferedImage getBufferedImage(String imagePath) {
         File imageFile = new File(imagePath);
@@ -100,26 +84,24 @@ public class ImageUtils {
         return null;
     }
 
-
-    public static String getImageType(File imageFile) {
+    public static ImageType getImageType(File imageFile) {
         if (!imageFile.exists()) {
-            return null;
+            throw new RuntimeException("PathFile --> " + imageFile + "Not Exists");
         }
         try (FileInputStream io = new FileInputStream(imageFile)) {
             byte[] bytes = new byte[8];
             io.read(bytes);
             String hexString = bytesToHexString(bytes);
-            System.out.println(hexString);
             if (isJpg(hexString)) {
-                return ImageType.JPEG.getType();
+                return ImageType.JPEG;
             } else if (isPng(hexString)) {
-                return ImageType.PNG.getType();
+                return ImageType.PNG;
             } else if (isGif(hexString)) {
-                return ImageType.GIF.getType();
+                return ImageType.GIF;
             } else if (isBmp(hexString)) {
-                return ImageType.BMP.getType();
+                return ImageType.BMP;
             } else if (isTiff(hexString)) {
-                return ImageType.TIFF.getType();
+                return ImageType.TIFF;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -127,11 +109,41 @@ public class ImageUtils {
         return null;
     }
 
-    public static String getImageType(String imagePath) {
+    public static ImageType getImageType(String imagePath) {
         if (StrUtil.isBlank(imagePath)) {
-            return null;
+            throw new RuntimeException("Image Path Not Empty");
         }
         return getImageType(new File(imagePath));
+    }
+
+    private static void write(BufferedImage image, String saveImagePath, ImageType toImageType) {
+        write(image,  saveImagePath,  toImageType, null);
+    }
+
+    private static void write(BufferedImage image, String saveImagePath, ImageType toImageType,Float quality) {
+        String type = toImageType.getType();
+        if (quality != null) {
+            ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(type).next();
+            ImageWriteParam param = imageWriter.getDefaultWriteParam();
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionType(param.getCompressionTypes()[0]);
+            param.setCompressionQuality(quality);
+
+            try (FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(saveImagePath + "." + type))) {
+                imageWriter.setOutput(fileImageOutputStream);
+                imageWriter.write(null, new javax.imageio.IIOImage(image, null, null), param);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                imageWriter.dispose();
+            }
+        }else{
+            try {
+                ImageIO.write(image, type, new File(saveImagePath + "." + type));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -144,6 +156,27 @@ public class ImageUtils {
             result.append(String.format("%02x", aByte));
         }
         return result.toString();
+    }
+
+    private static BufferedImage getDrawImageDoneBufferedImage(BufferedImage targetImage, ImageType imageType, Integer width, Integer height) {
+        Integer targetWidth = width;
+        Integer targetHeight = height;
+        if(targetWidth == null){
+            targetWidth = targetImage.getWidth();
+        }
+        if(targetHeight == null){
+            targetHeight = targetImage.getWidth();
+        }
+        BufferedImage result = new BufferedImage(targetWidth, targetHeight, imageType == ImageType.PNG ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = (Graphics2D) result.getGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.drawImage(targetImage, 0, 0, targetWidth, targetHeight, null);
+        graphics.dispose();
+        return result;
+    }
+
+    private static BufferedImage getDrawImageDoneBufferedImage(BufferedImage targetImage, ImageType imageType) {
+        return getDrawImageDoneBufferedImage(targetImage, imageType, null, null);
     }
 
     private static boolean isJpg(String hexStr) {
