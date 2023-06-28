@@ -303,15 +303,16 @@ public class FileUtils {
 
     /**
      * 获取文件或文件夹的大小 默认单位为字节
+     *
      * @param target 源文件或文件夹
      * @return
      */
-    public static long getFileOrDirectorySize(File target) {
+    public static long size(File target) {
         long result = 0;
-        if(target.isDirectory()){
+        if (target.isDirectory()) {
             File[] files = target.listFiles();
             for (File file : files) {
-                result+= getFileOrDirectorySize(file);
+                result += size(file);
             }
         }
         result += target.length();
@@ -320,17 +321,19 @@ public class FileUtils {
 
     /**
      * 获取文件或文件夹的大小
-     * @param target 源文件或文件夹
+     *
+     * @param target       源文件或文件夹
      * @param capacityUnit 单位
      * @return
      */
-    public static double getFileOrDirectorySize(File target,CapacityUnit capacityUnit) {
-        return getFileOrDirectorySize(target) / Math.pow(1024, capacityUnit.getPow());
+    public static double size(File target, CapacityUnit capacityUnit) {
+        return (double) size(target) / (1 << (capacityUnit.getPow() * 10));
     }
 
 
     /**
      * 设置文件或文件夹为隐藏
+     *
      * @param target 源文件或文件夹
      * @throws IOException
      */
@@ -339,11 +342,12 @@ public class FileUtils {
         if (target.getName().indexOf(".") == 0) {
             return;
         }
-        move(target,new File(target.getParent(),"."+target.getName()));
+        move(target, new File(target.getParent(), "." + target.getName()));
     }
 
     /**
      * 设置文件或文件夹为可见
+     *
      * @param target 源文件或文件夹
      * @throws IOException
      */
@@ -352,13 +356,13 @@ public class FileUtils {
         if (target.getName().indexOf(".") != 0) {
             return;
         }
-        move(target,new File(target.getParent(),target.getName().substring(1)));
+        move(target, new File(target.getParent(), target.getName().substring(1)));
     }
 
     /**
      * 计算机容量
      */
-    enum CapacityUnit{
+    enum CapacityUnit {
         /**
          * 字节
          */
@@ -385,7 +389,7 @@ public class FileUtils {
          */
         private Integer pow;
 
-        CapacityUnit(Integer pow){
+        CapacityUnit(Integer pow) {
             this.pow = pow;
         }
 
