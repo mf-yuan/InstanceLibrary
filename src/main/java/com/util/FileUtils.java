@@ -327,7 +327,7 @@ public class FileUtils {
      * @return
      */
     public static double size(File target, CapacityUnit capacityUnit) {
-        return (double) size(target) / (1 << (capacityUnit.getPow() * 10));
+        return (double) size(target) / capacityUnit.getByteSize();
     }
 
 
@@ -366,35 +366,31 @@ public class FileUtils {
         /**
          * 字节
          */
-        BIT(0),
+        BIT(1),
         /**
          * 千字节 1024 字节
          */
-        KB(1),
+        KB(1 << 10),
         /**
          * 兆字节 1024 * 1024
          */
-        MB(2),
+        MB(1 << 20),
         /**
          * 京字节 1024 * 1024 * 1024
          */
-        GB(3),
-        /**
-         * 1024 * 1024 * 1024 * 1024
-         */
-        TB(4);
+        GB(1 << 30);
 
         /**
          * 1024 的 平方
          */
-        private Integer pow;
+        private final Integer byteSize;
 
-        CapacityUnit(Integer pow) {
-            this.pow = pow;
+        CapacityUnit(Integer byteSize) {
+            this.byteSize = byteSize;
         }
 
-        public Integer getPow() {
-            return pow;
+        public Integer getByteSize() {
+            return byteSize;
         }
     }
 }

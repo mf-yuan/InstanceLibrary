@@ -2,16 +2,14 @@ package com.util;
 
 import cn.hutool.core.util.StrUtil;
 import com.constants.ImageConstants;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 
 /**
@@ -19,8 +17,8 @@ import java.math.BigDecimal;
  * @date 2023/6/25 22:31
  * @description
  */
+@Slf4j
 public class ImageUtils {
-
 
     /**
      * 图片类型
@@ -78,81 +76,63 @@ public class ImageUtils {
         compress(imagePath, toCompressImagePath, null, null, null, quality);
     }
 
-    public static void compressImage(String imagePath, String toCompressImagePath, Long specifySize) throws IOException {
+    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Long specifySize, FileUtils.CapacityUnit specifyType) throws IOException {
         File file = new File(imagePath);
         BufferedImage bufferedImage = getBufferedImage(file);
         if (bufferedImage == null) {
             throw new RuntimeException("Not Load " + imagePath + " Image");
         }
-        ImageType toImageType = getImageType(imagePath);
-
+        if (toImageType == null) {
+            toImageType = getImageType(imagePath);
+        }
         BufferedImage saveImage = getDrawImageDoneBufferedImage(bufferedImage, toImageType);
-
-
 
         BigDecimal quality = new BigDecimal("1.0");
         long size = file.length();
-        System.out.println("压缩前大小" + size);
-        while (size > specifySize && quality.floatValue() > 0) {
+        log.info("压缩前大小" + size);
+
+        long maxLength = specifySize * specifyType.getByteSize();
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        do {
             ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(toImageType.getType()).next();
             ImageWriteParam param = imageWriter.getDefaultWriteParam();
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
             param.setCompressionQuality(quality.floatValue());
-
-            try (FileImageOutputStream output = new FileImageOutputStream(new File(toCompressImagePath + quality +"." + toImageType.getType()))) {
-                imageWriter.setOutput(output);
-                imageWriter.write(null, new javax.imageio.IIOImage(saveImage, null, null), param);
-                size = output.length();
-                System.out.println("压缩后大小" + size);
-                System.out.println("压缩质量" + quality);
-                bufferedImage.flush();
-                saveImage.flush();
-                output.flush();
-                System.out.println(output.isCached());
+            try {
+                output.reset();
+                writeOutput(saveImage, imageWriter, param, output);
+                size = output.size();
+                log.info("压缩后大小:{}。压缩质量：{}", size, quality);
                 quality = quality.add(new BigDecimal("-0.1"));
-            } catch (IOException e) {
-                e.printStackTrace();
             } finally {
                 imageWriter.dispose();
             }
-            saveImage.flush();
+        } while (size > maxLength && quality.floatValue() > 0);
+
+        if (size > maxLength) {
+            log.warn("压缩指定大小失败！");
         }
-//        BufferedImage saveImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(),
-//                BufferedImage.TYPE_INT_ARGB);
-//        float quality = 1.0f;
-//        long compressedSize = Long.MAX_VALUE;
-//        while (compressedSize > specifySize && quality > 0) {
-//            // Perform image compression
-//            Graphics2D g2d = saveImage.createGraphics();
-//            g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-//                    RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-//            g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-//            g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-//            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-//            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-//            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//
-//            // Set the image compression quality
-//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
-//            ImageWriter writer = writers.next();
-//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-//            writeParam.setCompressionQuality(quality);
-//
-//            // Perform image compression
-//            ImageOutputStream outputStream = ImageIO.createImageOutputStream(new File(toCompressImagePath + "." + toImageType.getType()));
-//            writer.setOutput(outputStream);
-//            writer.write(null, new IIOImage(saveImage, null, null), writeParam);
-//            outputStream.close();
-//
-//            // Calculate the compressed image file size
-//            compressedSize = new File(toCompressImagePath + "." + toImageType.getType()).length();
-//
-//            System.out.println(compressedSize);
-//            // Adjust the image quality
-//            quality -= 0.1f;
-//        }
-//        System.out.println("Image compression successful!");
+
+        FileUtils.writeFile(new File(toCompressImagePath + "." + toImageType.getType()), output.toByteArray());
+    }
+
+    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Float scale, int i) throws IOException {
+        BufferedImage bufferedImage = getBufferedImage(imagePath);
+        if (bufferedImage == null) {
+            throw new RuntimeException("Not Load " + imagePath + " Image");
+        }
+        if (toImageType == null) {
+            toImageType = getImageType(imagePath);
+        }
+        int width = (int) (bufferedImage.getWidth() * scale);
+        int height = (int) (bufferedImage.getHeight() * scale);
+
+        Image scaledInstance = bufferedImage.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+
+        BufferedImage drawImageDoneBufferedImage = getDrawImageDoneBufferedImage(scaledInstance, toImageType);
+
+        writeUnChangeQuality(drawImageDoneBufferedImage, toCompressImagePath, toImageType);
     }
 
     public static BufferedImage getBufferedImage(File imageFile) {
@@ -215,13 +195,19 @@ public class ImageUtils {
         ImageWriteParam param = imageWriter.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(quality);
-
-
-        try (FileImageOutputStream output = new FileImageOutputStream(new File(saveImagePath + "." + type))) {
-            imageWriter.setOutput(output);
-            imageWriter.write(null, new javax.imageio.IIOImage(image, null, null), param);
+        try (FileOutputStream output = new FileOutputStream(saveImagePath + "." + type)) {
+            writeOutput(image, imageWriter, param, output);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void writeOutput(BufferedImage image, ImageWriter imageWriter, ImageWriteParam param, OutputStream output) throws IOException {
+        try {
+            imageWriter.setOutput(ImageIO.createImageOutputStream(output));
+            imageWriter.write(null, new javax.imageio.IIOImage(image, null, null), param);
+        } catch (IOException e) {
+            throw e;
         } finally {
             imageWriter.dispose();
         }
@@ -235,47 +221,36 @@ public class ImageUtils {
         }
     }
 
-
-    private static String bytesToHexString(byte[] bytes) {
-        if (bytes == null || bytes.length <= 0) {
-            return null;
-        }
-        StringBuilder result = new StringBuilder();
-        for (byte aByte : bytes) {
-            result.append(String.format("%02x", aByte));
-        }
-        return result.toString();
-    }
-
-    private static BufferedImage getDrawImageDoneBufferedImage(BufferedImage targetImage, ImageType imageType, Integer width, Integer height) {
+    private static BufferedImage getDrawImageDoneBufferedImage(Image targetImage, ImageType imageType, Integer width, Integer height) {
         Integer targetWidth = width;
         Integer targetHeight = height;
         if (targetWidth == null) {
-            targetWidth = targetImage.getWidth();
+            targetWidth = targetImage.getWidth(null);
         }
         if (targetHeight == null) {
-            targetHeight = targetImage.getHeight();
+            targetHeight = targetImage.getHeight(null);
         }
 
         int colorType = imageType == ImageType.PNG ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
         BufferedImage result = new BufferedImage(targetWidth, targetHeight, colorType);
 
         Graphics2D graphics = (Graphics2D) result.getGraphics();
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         graphics.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
                 RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
         graphics.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         graphics.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-//        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+
 
         graphics.drawImage(targetImage, 0, 0, targetWidth, targetHeight, null);
         graphics.dispose();
         return result;
     }
 
-    private static BufferedImage getDrawImageDoneBufferedImage(BufferedImage targetImage, ImageType imageType) {
+    private static BufferedImage getDrawImageDoneBufferedImage(Image targetImage, ImageType imageType) {
         return getDrawImageDoneBufferedImage(targetImage, imageType, null, null);
     }
 
@@ -297,5 +272,17 @@ public class ImageUtils {
 
     private static boolean isTiff(String hexStr) {
         return hexStr.startsWith(ImageConstants.TIFF_START_HEAD_1) || hexStr.startsWith(ImageConstants.TIFF_START_HEAD_2);
+    }
+
+
+    private static String bytesToHexString(byte[] bytes) {
+        if (bytes == null || bytes.length <= 0) {
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        for (byte aByte : bytes) {
+            result.append(String.format("%02x", aByte));
+        }
+        return result.toString();
     }
 }
