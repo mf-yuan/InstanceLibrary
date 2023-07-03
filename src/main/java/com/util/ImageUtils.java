@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 /**
  * @author yuanmengfan
  * @date 2023/6/25 22:31
+ * @version 1.0
  * @description
  */
 @Slf4j
@@ -47,24 +48,20 @@ public class ImageUtils {
         }
     }
 
-    /**
-     * @param imagePath 待处理图片文件路径
-     * @param savePath  处理后保存文件的地址 不带后缀
-     * @param imageType 保存的文件格式 如果为空则使用 imagePath的文件格式保存
-     */
-    private static void processImage(String imagePath, String savePath, ImageType imageType, Integer width, Integer height, Float scale, Float quality) {
+
+    private static boolean processImage(String imagePath, OutputStream output, ImageType imageType, Integer width, Integer height, Float scale, Float quality) {
         BufferedImage bufferedImage = null;
         ImageType targetImageType = imageType;
         try {
             bufferedImage = getBufferedImage(imagePath);
         } catch (IOException e) {
             log.error("Not Load " + imagePath + " Image");
-            return;
+            return false;
         }
 
-        if (StrUtil.isBlank(savePath)) {
-            log.error("SavePath Cannot Empty");
-            return;
+        if (output == null) {
+            log.error("Output Cannot NULL");
+            return false;
         }
 
         if (targetImageType == null) {
@@ -72,26 +69,75 @@ public class ImageUtils {
             targetImageType = getImageType(imagePath);
             if (targetImageType == null) {
                 log.error("Unable to obtain the type of saved image");
-                return;
+                return false;
             }
         }
 
-        if(scale != null && scale <= 0){
+        if (scale != null && scale <= 0) {
             log.error("Scaling value needs to be greater than 0 ");
-            return;
+            return false;
         }
 
-        if(quality != null && quality <= 0){
+        if (quality != null && quality <= 0) {
             log.error("Quality value needs to be greater than 0 ");
-            return;
+            return false;
         }
 
-        BufferedImage targetImage = getDrawImageDoneBufferedImage(bufferedImage, imageType, width, height, scale);
+        BufferedImage targetImage = getDrawImageDoneBufferedImage(bufferedImage, targetImageType, width, height, scale);
 
-        boolean isSuccess = write(targetImage, savePath, imageType, quality);
-        if (!isSuccess) {
-            log.error("Image write fail");
+        return write(targetImage, output, targetImageType, quality);
+    }
+
+    /**
+     * @param imagePath 待处理图片文件路径
+     * @param savePath  处理后保存文件的地址 不带后缀
+     * @param imageType 保存的文件格式 如果为空则使用 imagePath的文件格式保存
+     * @return
+     */
+    private static boolean processImage(String imagePath, String savePath, ImageType imageType, Integer width, Integer height, Float scale, Float quality) {
+        if (StrUtil.isBlank(savePath)) {
+            log.error("SavePath Cannot Empty");
+            return false;
         }
+        try (FileOutputStream output = new FileOutputStream(savePath + "." + imageType.getName())) {
+            return processImage(imagePath, output, imageType, width, height, scale, quality);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    public static boolean processImage(String imagePath, String savePath, ImageType imageType, Float scale, Float quality) {
+        return processImage(imagePath, savePath, imageType, null, null, scale, quality);
+    }
+
+    public static boolean processImage(String imagePath, String savePath, ImageType imageType, Integer width, Integer height, Float quality) {
+        return processImage(imagePath, savePath, imageType, width, height, null, quality);
+    }
+
+    public static boolean processImage(String imagePath, String savePath, ImageType imageType) {
+        return processImage(imagePath, savePath, imageType, null, null, null, null);
+    }
+
+    public static boolean processImage(String imagePath, String savePath) {
+        return processImage(imagePath, savePath, null, null, null, null, null);
+    }
+
+    public static boolean processImageQuality(String imagePath, String savePath, ImageType imageType, Float quality) {
+        return processImage(imagePath, savePath, imageType, null, null, null, quality);
+    }
+
+    public static boolean processImageQuality(String imagePath, OutputStream output, ImageType imageType, Float quality) {
+        return processImage(imagePath, output, imageType, null, null, null, quality);
+    }
+
+    public static boolean processImageScaled(String imagePath, String savePath, ImageType imageType, Float scale) {
+        return processImage(imagePath, savePath, imageType, null, null, scale, null);
+    }
+
+    public static boolean processImageScaled(String imagePath, OutputStream output, ImageType imageType, Float scale) {
+        return processImage(imagePath, output, imageType, null, null, scale, null);
     }
 
     /**
@@ -137,154 +183,127 @@ public class ImageUtils {
     }
 
     private static BufferedImage getDrawImageDoneBufferedImage(Image targetImage, ImageType imageType) {
-        return getDrawImageDoneBufferedImage(targetImage, imageType, null, null,null);
+        return getDrawImageDoneBufferedImage(targetImage, imageType, null, null, null);
     }
 
     /**
-     * 根据是否传入quality选择不同的写入图片的方式
+     * 将图片写入输出流程
+     * 如果不改变质量则直接使用 ImageIO.write 写入图片
+     * 反之使用 ImageWriter
      *
-     * @param image         源图片
-     * @param saveImagePath 保存图片的路径
-     * @param toImageType   保存图片的类型
-     * @param quality       图片质量
+     * @param image     源图片
+     * @param output    输出流
+     * @param imageType 保存图片的类型
+     * @param quality   图片质量
      * @return
      */
-    private static boolean write(BufferedImage image, String saveImagePath, ImageType toImageType, Float quality) {
-        return quality == null ? writeNoChangeQuality(image, saveImagePath, toImageType) :
-                writeChangeQuality(image, saveImagePath, toImageType, quality);
-    }
-
-    /**
-     * 图片无质量变化的时候的写入方法
-     *
-     * @param image         源文件
-     * @param saveImagePath 保存路径
-     * @param toImageType   保存图片格式
-     * @return
-     */
-    private static boolean writeNoChangeQuality(BufferedImage image, String saveImagePath, ImageType toImageType) {
-        String type = toImageType.getName();
+    private static boolean write(BufferedImage image, OutputStream output, ImageType imageType, Float quality) {
+        String type = imageType.getName();
         try {
-            return ImageIO.write(image, type, new File(saveImagePath + "." + type));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * 图片有质量变化的时候的写入方法
-     * 因为有质量变化的时候需要使用 ImageWriteParam
-     *
-     * @param image         源文件
-     * @param saveImagePath 保存路径
-     * @param toImageType   保存图片格式
-     * @return
-     */
-    private static boolean writeChangeQuality(BufferedImage image, String saveImagePath, ImageType toImageType, Float quality) {
-        String type = toImageType.getName();
-        try (FileOutputStream output = new FileOutputStream(saveImagePath + "." + type)) {
-            writeOutput(image, type, quality, output);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * 将image文件写入文件写入流中
-     *
-     * @param image   源文件
-     * @param type    保存图片格式
-     * @param quality 质量
-     * @param output  输出流
-     * @throws IOException
-     */
-    private static void writeOutput(BufferedImage image, String type, Float quality, OutputStream output) throws IOException {
-        ImageWriter imageWriter = null;
-        try {
-            imageWriter = ImageIO.getImageWritersByFormatName(type).next();
+            if (quality == null) {
+                return ImageIO.write(image, type, ImageIO.createImageOutputStream(output));
+            }
+            ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(type).next();
             ImageWriteParam param = imageWriter.getDefaultWriteParam();
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
             param.setCompressionQuality(quality);
             imageWriter.setOutput(ImageIO.createImageOutputStream(output));
             imageWriter.write(null, new javax.imageio.IIOImage(image, null, null), param);
-        } catch (IOException e) {
-            throw e;
-        } finally {
             imageWriter.dispose();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return false;
     }
 
-    public static void processImage(String imagePath, String savePath, ImageType imageType, Float scale, Float quality) {
-        processImage(imagePath, savePath, imageType,null,null, scale, quality);
+    /**
+     * 将源文件数据通过FileOutputStream保存到saveImagePath的文件中
+     *
+     * @param image         源图片
+     * @param saveImagePath 保存图片的路径
+     * @param imageType     保存图片的类型
+     * @param quality       图片质量
+     * @return
+     */
+    private static boolean write(BufferedImage image, String saveImagePath, ImageType imageType, Float quality) {
+        try (FileOutputStream output = new FileOutputStream(saveImagePath + "." + imageType.getName())) {
+            return write(image, output, imageType, quality);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    public static void processImage(String imagePath, String savePath, ImageType imageType,Integer width,Integer height, Float quality) {
-        processImage(imagePath, savePath, imageType,width,height, null, quality);
+    /**
+     * 压缩方式
+     */
+    enum CompressType {
+        // 质量压缩
+        QualityCompress,
+        // 缩放压缩
+        ScaledCompress
     }
 
-    public static void processImage(String imagePath, String savePath, ImageType imageType) {
-        processImage(imagePath, savePath, imageType,null,null, null, null);
-    }
-
-    public static void processImage(String imagePath, String savePath) {
-        processImage(imagePath, savePath, null,null,null, null, null);
-    }
-
-    public static void processImageQuality(String imagePath, String savePath, ImageType imageType , Float quality) {
-        processImage(imagePath, savePath, imageType,null,null, null, quality);
-    }
-
-
-    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Long specifySize, FileUtils.CapacityUnit specifyType) throws IOException {
+    /**
+     * 将图片压缩指指定文件大小 最多尝试10次 最后还未压缩至指定大小则返回false
+     * 压缩成功后将文件保存至 toCompressImagePath中
+     *
+     * @param imagePath           图片文件地址
+     * @param toCompressImagePath 保存文件的地址
+     * @param imageType           图片格式
+     * @param specifySize         指定的大小
+     * @param specifyType         指定的单位
+     * @param compressType        压缩方式
+     * @return
+     * @throws IOException
+     */
+    public static boolean compressImage(String imagePath, String toCompressImagePath, ImageType imageType
+            , Long specifySize, FileUtils.CapacityUnit specifyType, CompressType compressType) throws IOException {
+        if (compressType == null) {
+            log.error("CompressType Cannot NULL");
+            return false;
+        }
         File file = new File(imagePath);
-        BufferedImage bufferedImage = getBufferedImage(file);
-        if (bufferedImage == null) {
-            throw new RuntimeException("Not Load " + imagePath + " Image");
-        }
-        if (toImageType == null) {
-            toImageType = getImageType(imagePath);
-        }
-        BufferedImage saveImage = getDrawImageDoneBufferedImage(bufferedImage, toImageType);
 
-        BigDecimal quality = new BigDecimal("1.0");
+        BigDecimal targetValue = new BigDecimal("1.0");
         long size = file.length();
         log.info("压缩前大小" + size);
 
         long maxLength = specifySize * specifyType.getByteSize();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
+        boolean flag = false;
         do {
             output.reset();
-            writeOutput(saveImage, toImageType.getName(), quality.floatValue(), output);
+            if (compressType == CompressType.QualityCompress) {
+                flag = processImageQuality(imagePath, output, imageType, targetValue.floatValue());
+            } else if (compressType == CompressType.ScaledCompress) {
+                flag = processImageScaled(imagePath, output, imageType, targetValue.floatValue());
+            }
+            if (!flag) {
+                log.error("压缩失败！");
+                return false;
+            }
             size = output.size();
-            log.info("压缩后大小:{}。压缩质量：{}", size, quality);
-            quality = quality.add(new BigDecimal("-0.1"));
-        } while (size > maxLength && quality.floatValue() > 0);
+            log.info("压缩后大小:{}、{}Value：{}", size, compressType, targetValue);
+            targetValue = targetValue.subtract(new BigDecimal("0.1"));
+        } while (size > maxLength && targetValue.floatValue() > 0);
         if (size > maxLength) {
-            log.warn("压缩指定大小失败！");
+            log.error("压缩指定大小失败！");
+            return false;
         }
-        FileUtils.writeFile(new File(toCompressImagePath + "." + toImageType.getName()), output.toByteArray());
+        FileUtils.writeFile(new File(toCompressImagePath + "." + imageType.getName()), output.toByteArray());
+        return true;
     }
 
-    public static void compressImage(String imagePath, String toCompressImagePath, ImageType toImageType, Float scale, int i) throws IOException {
-        BufferedImage bufferedImage = getBufferedImage(imagePath);
-        if (bufferedImage == null) {
-            throw new RuntimeException("Not Load " + imagePath + " Image");
-        }
-        if (toImageType == null) {
-            toImageType = getImageType(imagePath);
-        }
-        int width = (int) (bufferedImage.getWidth() * scale);
-        int height = (int) (bufferedImage.getHeight() * scale);
+    public static boolean compressImageQuality(String imagePath, String toCompressImagePath, ImageType imageType
+            , Long specifySize, FileUtils.CapacityUnit specifyType) throws IOException {
+        return compressImage(imagePath, toCompressImagePath, imageType, specifySize, specifyType, CompressType.QualityCompress);
+    }
 
-        Image scaledInstance = bufferedImage.getScaledInstance(width, height, Image.SCALE_DEFAULT);
-
-        BufferedImage drawImageDoneBufferedImage = getDrawImageDoneBufferedImage(scaledInstance, toImageType);
-
-        writeNoChangeQuality(drawImageDoneBufferedImage, toCompressImagePath, toImageType);
+    public static boolean compressImageScaled(String imagePath, String toCompressImagePath, ImageType imageType
+            , Long specifySize, FileUtils.CapacityUnit specifyType) throws IOException {
+        return compressImage(imagePath, toCompressImagePath, imageType, specifySize, specifyType, CompressType.ScaledCompress);
     }
 
     /**
