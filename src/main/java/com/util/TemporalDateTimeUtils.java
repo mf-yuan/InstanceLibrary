@@ -1,6 +1,6 @@
 package com.util;
 
-import com.model.DateFiled;
+//import com.model.DateFiled;
 import com.model.DateFormat;
 
 import java.time.*;
@@ -272,15 +272,15 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtils {
      * @author yuanmengfan
      * @date 2022/3/29 1:50 下午
      */
-    public static LocalDateTime getBeginDateSubValue(LocalDateTime localDateTime, DateFiled dateFiled){
-        if(dateFiled.getChronoField() == ChronoField.YEAR){
-            return getEpochDateTime();
-        }
-        for (int i = dateFiled.getSortIndex(); i < DateFiled.values().length + 1 ; i++) {
-            localDateTime = getBeginDateValue(localDateTime,DateFiled.of(i).getChronoField());
-        }
-        return localDateTime;
-    }
+//    public static LocalDateTime getBeginDateSubValue(LocalDateTime localDateTime, DateFiled dateFiled){
+//        if(dateFiled.getChronoField() == ChronoField.YEAR){
+//            return getEpochDateTime();
+//        }
+//        for (int i = dateFiled.getSortIndex(); i < DateFiled.values().length + 1 ; i++) {
+//            localDateTime = getBeginDateValue(localDateTime,DateFiled.of(i).getChronoField());
+//        }
+//        return localDateTime;
+//    }
     /**
      * 获得当前日期指定 temporalField 的结束时间 包括子字段
      * 例1、LocalDateTime = now() TemporalField = DateFiled.Day
@@ -294,12 +294,12 @@ public class TemporalDateTimeUtils extends TemporalAccessorUtils {
      * @author yuanmengfan
      * @date 2022/3/30 1:08 下午
      */
-    public static LocalDateTime getEndDateSubValue(LocalDateTime localDateTime, DateFiled dateFiled){
-        for (int i = dateFiled.getSortIndex(); i < DateFiled.values().length + 1 ; i++) {
-            localDateTime = getEndDateValue(localDateTime,DateFiled.of(i).getChronoField());
-        }
-        return localDateTime;
-    }
+//    public static LocalDateTime getEndDateSubValue(LocalDateTime localDateTime, DateFiled dateFiled){
+//        for (int i = dateFiled.getSortIndex(); i < DateFiled.values().length + 1 ; i++) {
+//            localDateTime = getEndDateValue(localDateTime,DateFiled.of(i).getChronoField());
+//        }
+//        return localDateTime;
+//    }
 
     /**
      * 获得两个日期之间的某个字段的差值
