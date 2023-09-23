@@ -1,8 +1,10 @@
 package com.util;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -292,13 +294,8 @@ public class FileUtils {
      * @return 是否为本地文件
      */
     public static boolean isLocalFile(String filePath) {
-        try {
-            URI uri = new URI(filePath);
-            String scheme = uri.getScheme();
-            return "file".equals(scheme);
-        } catch (URISyntaxException e) {
-            return false;
-        }
+        File file = new File(filePath);
+        return file.exists() && file.exists();
     }
 
     /**

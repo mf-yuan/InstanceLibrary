@@ -106,24 +106,24 @@ public class ExcelUtil {
 //        return infoplusApi.uploadFile("https://ehall.hust.edu.cn/file", "a46b8ty00ed411e58d5e00163e02hl78", file.getAbsolutePath());
 //    }
 
-    public List<Map<String, String>> readExcel(String filePath, String[] keys) {
+    public static List<Map<String, String>> readExcel(String filePath, String[] keys) {
         return readExcel(filePath, null, keys, 1, 0);
     }
 
-    public List<Map<String, String>> readExcel(String filePath, String type, String[] keys) {
+    public static List<Map<String, String>> readExcel(String filePath, String type, String[] keys) {
         return readExcel(filePath, type, keys, 1, 0);
     }
 
-    public List<Map<String, String>> readExcel(String filePath, String[] keys, int dataStartIndex) {
+    public static  List<Map<String, String>> readExcel(String filePath, String[] keys, int dataStartIndex) {
         return readExcel(filePath, null, keys, dataStartIndex, 0);
     }
 
-    public List<Map<String, String>> readExcel(String filePath, String[] keys, int dataStartIndex, int startColumn) {
+    public static List<Map<String, String>> readExcel(String filePath, String[] keys, int dataStartIndex, int startColumn) {
         return readExcel(filePath, null, keys, dataStartIndex, startColumn);
     }
 
-    public List<Map<String, String>> readExcel(String filePath, String type, String[] keys, int dataStartIndex, int startColumn) {
-        Workbook workbook = outToExcel(filePath, type);
+    public static List<Map<String, String>> readExcel(String filePath, String type, String[] keys, int dataStartIndex, int startColumn) {
+        Workbook workbook = fileToWorkBook(filePath, type);
         List<Map<String, String>> result = new ArrayList<>();
         Sheet sheetAt = workbook.getSheetAt(0);
         int physicalNumberOfRows = sheetAt.getPhysicalNumberOfRows();
@@ -176,9 +176,7 @@ public class ExcelUtil {
         return result;
     }
 
-    private Workbook outToExcel(String filePath, String type) {
-        // 拿到对应的输出流
-//        ByteArrayOutputStream byteArrayOutputStream = HttpConnection.httpDownloadFile(filePath, null);
+    public static Workbook fileToWorkBook(String filePath, String type) {
         Workbook workbook = null;
         InputStream inputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
@@ -192,15 +190,14 @@ public class ExcelUtil {
                 // 如果是网络文件 我们用ByteArrayOutputStream 接收然后写入到bytes中即可
                 inputStream = new URL(filePath).openStream();
             }
-
             byteArrayOutputStream = new ByteArrayOutputStream();
-            //创建存放文件内容的数组
+            // 创建存放文件内容的数组
             byte[] buff = new byte[1024];
-            //所读取的内容使用n来接收
+            // 所读取的内容使用n来接收
             int n;
-            //当没有读取完时,继续读取,循环
+            // 当没有读取完时,继续读取,循环
             while ((n = inputStream.read(buff)) != -1) {
-                //将字节数组的数据全部写入到输出流中
+                // 将字节数组的数据全部写入到输出流中
                 byteArrayOutputStream.write(buff, 0, n);
             }
             bytes = byteArrayOutputStream.toByteArray();
@@ -210,7 +207,7 @@ public class ExcelUtil {
             if (StringUtils.isNotBlank(type)) {
                 excelType = ExcelType.valueOf(type.toUpperCase());
             } else {
-                excelType = this.getExcelType(filePath);
+                excelType = getExcelType(filePath);
             }
             if (excelType == ExcelType.XLS) {
                 workbook = new HSSFWorkbook(new POIFSFileSystem(byteArrayInputStream));
@@ -227,7 +224,7 @@ public class ExcelUtil {
                 byteArrayOutputStream.flush();
                 byteArrayOutputStream.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
         return workbook;
@@ -235,11 +232,11 @@ public class ExcelUtil {
 
     // 将api中的文件转换成WorkBook
     // 支持 xls | x xlxs
-    private Workbook outToExcel(String filePath) {
-        return outToExcel(filePath, null);
+    public static Workbook fileToWorkBook(String filePath) {
+        return fileToWorkBook(filePath, null);
     }
 
-    public ExcelType getExcelType(String filePath) {
+    public static ExcelType getExcelType(String filePath) {
         if (StrUtil.isEmpty(filePath)) {
             return null;
         }
@@ -268,7 +265,7 @@ public class ExcelUtil {
      * @param cell
      * @return
      */
-    public String getCellValue(Cell cell) {
+    public static String getCellValue(Cell cell) {
 
         if (cell == null) {
             return "";
@@ -330,7 +327,7 @@ public class ExcelUtil {
         if (border) {
             columnHeadStyle.setBorderLeft(BorderStyle.THIN);
             columnHeadStyle.setBorderRight(BorderStyle.THIN);
-            columnHeadStyle.setBorderTop(BorderStyle.THIN);//边框
+            columnHeadStyle.setBorderTop(BorderStyle.THIN);// 边框
             columnHeadStyle.setBorderBottom(BorderStyle.THIN);
             columnHeadStyle.setRightBorderColor((short) 8);// 右边框的颜色
             columnHeadStyle.setBottomBorderColor((short) 8); // 设置单元格的边框颜色
@@ -344,20 +341,23 @@ public class ExcelUtil {
         return columnHeadStyle;
     }
 
-    public File getWorkBookFile(Workbook workbook, String fileName) throws IOException {
+    public static File workToFile(Workbook workbook, String fileName) throws IOException {
         File file = new File(fileName + ".xlsx");
         OutputStream os = null;
         try {
             // 用 file取创建一个输出流
             os = new FileOutputStream(file);
-            // 把hssfWorkbook 写入到 这个输出流中
+            // 把Workbook 写入到 这个输出流中
             workbook.write(os);
         } catch (IOException ex) {
+            ex.printStackTrace();
             throw ex;
         } finally {
             try {
-                os.flush();
-                os.close();
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
                 throw ex;
