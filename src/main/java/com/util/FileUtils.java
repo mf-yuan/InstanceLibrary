@@ -1,10 +1,10 @@
 package com.util;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +15,43 @@ import java.util.Objects;
  * @description
  */
 public class FileUtils {
+
+    public static File downloadFile(String uri,String savePath)  {
+        if(StrUtil.isBlank(uri)){
+            return null;
+        }
+        if(StrUtil.isBlank(savePath)){
+            savePath = PathUtil.getClassPath()+System.currentTimeMillis();
+        }
+        File file = new File(savePath);
+        InputStream inputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            URL url = new URL(uri);
+            URLConnection urlConnection = url.openConnection();
+            inputStream = urlConnection.getInputStream();
+            byte[] buffer = new byte[4096];
+            fileOutputStream = new FileOutputStream(file);
+            while (inputStream.read(buffer) != -1) {
+                fileOutputStream.write(buffer);
+            }
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if(inputStream !=null){
+                    inputStream.close();
+                }
+                if(fileOutputStream !=null){
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     /**
      * 将文件转换为字节数组
@@ -294,9 +331,9 @@ public class FileUtils {
      * @return 是否为本地文件
      */
     public static boolean isLocalFile(String filePath) {
-        File file = new File(filePath);
-        return file.exists() && file.exists();
+        return new File(filePath).exists();
     }
+
 
     /**
      * 获取文件或文件夹的大小 默认单位为字节
