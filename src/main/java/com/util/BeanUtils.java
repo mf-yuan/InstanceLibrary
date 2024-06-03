@@ -18,6 +18,7 @@ import java.util.*;
  * @date 2023/5/28 15:29
  * @description Java Object To Map
  * Map To Java Object
+ *
  */
 @Slf4j
 public class BeanUtils {
@@ -176,6 +177,14 @@ public class BeanUtils {
 
     public static void copyProperties(Object obj, Object target) {
         copyProperties(obj, target, false);
+    }
+
+    public static void cleanProperties(Object obj) throws IllegalAccessException {
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            field.set(obj,null);
+        }
     }
 
 

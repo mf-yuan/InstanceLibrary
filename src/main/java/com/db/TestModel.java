@@ -3,9 +3,9 @@ package com.db;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.setting.Setting;
+import com.constants.DefaultValueConstants;
 import com.db.annotation.ColumnExtension;
 import com.db.annotation.TableExtension;
-import com.model.YFSYQKZXJCZFXXList;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author yuanmengfan
@@ -33,11 +32,11 @@ public class TestModel<T> {
     private String name;
     @ColumnExtension(remark = "年龄", length = 10)
     private int age;
-    @ColumnExtension(defaultValue = DefaultValues.NULL, remark = "工资")
+    @ColumnExtension(defaultValue = DefaultValueConstants.NULL, remark = "工资")
     private Double salary;
     @ColumnExtension(remark = "生日")
     private Date birth;
-    @ColumnExtension(defaultValue=DefaultValues.TRUE,remark = "是否禁用")
+    @ColumnExtension(defaultValue=DefaultValueConstants.TRUE,remark = "是否禁用")
     private boolean disabled;
 
     private LocalDate localDate;
@@ -46,7 +45,7 @@ public class TestModel<T> {
 
     private LocalTime localTime;
 
-    private List<YFSYQKZXJCZFXXList> list;
+//    private List<YFSYQKZXJCZFXXList> list;
 
     public static void main(String[] args) throws SQLException {
         String db_setting = "db/db.setting";

@@ -14,7 +14,7 @@ import java.util.Objects;
  * @date 2023/3/30 23:34
  * @description
  */
-public class FileUtils {
+public class FileUtils   {
 
     public static File downloadFile(String uri,String savePath)  {
         if(StrUtil.isBlank(uri)){
