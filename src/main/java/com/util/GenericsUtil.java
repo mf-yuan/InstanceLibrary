@@ -14,6 +14,36 @@ import java.util.stream.Collectors;
  */
 public class GenericsUtil {
 
+
+    /**
+     *
+     * 获取父类的泛型信息 <> 中的信息
+     * @param clazz
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public static Type[] getSuperGenericsTypeByClass(Class<?> clazz) {
+        return ((ParameterizedType) clazz.getGenericSuperclass()).getActualTypeArguments();
+    }
+
+    /**
+     *
+     * 获取当前类接口的泛型信息 <> 中的信息
+     * @param clazz
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public static List<Type[]> getInterfaceGenericsTypeByClass(Class<?> clazz) {
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+        int length = genericInterfaces.length;
+        if (length == 0) {
+            return null;
+        }
+        return Arrays.stream(genericInterfaces)
+                .map(type -> ((ParameterizedType) type).getActualTypeArguments())
+                .collect(Collectors.toList());
+    }
+
     /**
      * 拿到下标为index的泛型类型
      *
