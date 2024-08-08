@@ -14,6 +14,36 @@ import java.util.stream.Collectors;
  */
 public class GenericsUtil {
 
+
+    /**
+     *
+     * 获取父类的泛型信息 <> 中的信息
+     * @param clazz
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public static Type[] getSuperGenericsTypeByClass(Class<?> clazz) {
+        return ((ParameterizedType) clazz.getGenericSuperclass()).getActualTypeArguments();
+    }
+
+    /**
+     *
+     * 获取当前类接口的泛型信息 <> 中的信息
+     * @param clazz
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public static List<Type[]> getInterfaceGenericsTypeByClass(Class<?> clazz) {
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+        int length = genericInterfaces.length;
+        if (length == 0) {
+            return null;
+        }
+        return Arrays.stream(genericInterfaces)
+                .map(type -> ((ParameterizedType) type).getActualTypeArguments())
+                .collect(Collectors.toList());
+    }
+
     /**
      * 拿到下标为index的泛型类型
      * @title getGenericsTypeByFiledAndIndex
@@ -24,7 +54,7 @@ public class GenericsUtil {
      * @date 2022/7/20 14:18
      */
     public static Class<?> getGenericsTypeByFiledAndIndex(Field field, int index) throws ClassNotFoundException {
-        return Class.forName(getGenericsTypeNameByFiledAndIndex(field,index));
+        return Class.forName(getGenericsTypeNameByFiledAndIndex(field, index));
     }
 
     /**
@@ -35,7 +65,7 @@ public class GenericsUtil {
      * @author yuanmengfan
      * @date 2022/7/20 14:19
      */
-    public static List<Class<?>> getGenericsTypeByFiledAll(Field field){
+    public static List<Class<?>> getGenericsTypeByFiledAll(Field field) {
         return getGenericsTypeNameByFiledAll(field).stream().map(fieldName -> {
             try {
                 return Class.forName(fieldName);
@@ -56,7 +86,7 @@ public class GenericsUtil {
      * @author yuanmengfan
      * @date 2022/7/20 14:18
      */
-    public static String getGenericsTypeNameByFiledAndIndex(Field field,int index){
+    public static String getGenericsTypeNameByFiledAndIndex(Field field, int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
         return genericType.getActualTypeArguments()[index].getTypeName();
     }
@@ -69,7 +99,7 @@ public class GenericsUtil {
      * @author yuanmengfan
      * @date 2022/7/20 14:19
      */
-    public static List<String> getGenericsTypeNameByFiledAll(Field field){
+    public static List<String> getGenericsTypeNameByFiledAll(Field field) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
         return Arrays.stream(genericType.getActualTypeArguments()).map(Type::getTypeName).collect(Collectors.toList());
     }
