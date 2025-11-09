@@ -22,7 +22,7 @@ public class GenericsUtil {
      * @return java.lang.String
      * @title getGenericsTypeByFiledAndIndex
      * @author yuanmengfan
-     * @date 2022/7/20 14:18
+     * @date 2022/7/20 14:181
      */
     public static Class<?> getGenericsTypeByFiledAndIndex(Field field, int index) throws ClassNotFoundException {
         return Class.forName(getGenericsTypeNameByFiledAndIndex(field, index));

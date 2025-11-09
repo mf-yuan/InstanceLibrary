@@ -33,7 +33,7 @@ public enum FieldToColumnType {
     MYSQL_BOOLEAN_PACKING_COLUMN_TYPE("com.lang.Boolean", "tinyint", "1", DbType.MySQL),
     MYSQL_FLOAT_PACKING_COLUMN_TYPE("com.lang.Float", "float", "", DbType.MySQL),
     MYSQL_DOUBLE_PACKING_COLUMN_TYPE("com.lang.Double", "double", "", DbType.MySQL),
-    MYSQL_CHAR_PACKING_COLUMN_TYPE("com.lang.Character", "VARCHAR", "255", DbType.MySQL),
+    MYSQL_CHAR_PACKING_COLUMN_TYPE("com.lang.Character", "VARCHAR", "1000", DbType.MySQL),
     MYSQL_BYTEARRAY_COLUMN_TYPE("byte[]", "blob", "", DbType.MySQL),
     MYSQL_DATE_COLUMN_TYPE("java.util.Date", "datetime", "", DbType.MySQL),
     MYSQL_SQL_DATE_COLUMN_TYPE("java.sql.Date", "date", "", DbType.MySQL),
@@ -41,7 +41,7 @@ public enum FieldToColumnType {
     MYSQL_LOCALDATE_COLUMN_TYPE("java.time.LocalDate", "date", "", DbType.MySQL),
     MYSQL_LOCALDATETIME_COLUMN_TYPE("java.time.LocalDateTime", "datetime", "", DbType.MySQL),
     MYSQL_LOCALTIME_COLUMN_TYPE("java.time.LocalTime", "time", "", DbType.MySQL),
-    DEFAULT_MYSQL_UNKNOWN_TYPE("String", "VARCHAR", "255", DbType.MySQL),
+    DEFAULT_MYSQL_UNKNOWN_TYPE("String", "VARCHAR", "1000", DbType.MySQL),
 
     // Oracle类型
     // Number类型是oralce的数值类型，存储的数值的精度可以达到38位。
@@ -60,7 +60,7 @@ public enum FieldToColumnType {
     ORACLE_BOOLEAN_COLUMN_TYPE("boolean", "CHAR", "1", DbType.Oracle),
     ORACLE_FLOAT_COLUMN_TYPE("float", "NUMBER", "13,2", DbType.Oracle),
     ORACLE_DOUBLE_COLUMN_TYPE("double", "NUMBER", "23,2", DbType.Oracle),
-    ORACLE_CHAR_COLUMN_TYPE("char", "VARCHAR2", "255", DbType.Oracle),
+    ORACLE_CHAR_COLUMN_TYPE("char", "VARCHAR2", "1000", DbType.Oracle),
     ORACLE_BYTE_PACKING_COLUMN_TYPE("com.lang.Byte", "CHAR", "1", DbType.Oracle),
     ORACLE_INT_PACKING_COLUMN_TYPE("com.lang.Integer", "NUMBER", "11", DbType.Oracle),
     ORACLE_SHORT_PACKING_COLUMN_TYPE("com.lang.Short", "NUMBER", "6", DbType.Oracle),
@@ -73,7 +73,7 @@ public enum FieldToColumnType {
     ORACLE_DATE_COLUMN_TYPE("java.util.Date", "DATE", "", DbType.Oracle),
     ORACLE_SQL_DATE_COLUMN_TYPE("java.sql.Date", "DATE", "", DbType.Oracle),
     ORACLE_TIMESTAMP_COLUMN_TYPE("java.sql.TIMESTAMP", "TIMESTAMP", "", DbType.MySQL),
-    DEFAULT_ORACLE_UNKNOWN_TYPE("String", "VARCHAR2", "255", DbType.Oracle);
+    DEFAULT_ORACLE_UNKNOWN_TYPE("String", "VARCHAR2", "1000", DbType.Oracle);
 
     // Model对象属性的类型
     private final String fieldType;

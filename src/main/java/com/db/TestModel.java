@@ -1,15 +1,15 @@
 package com.db;
 
+import com.db.annotation.ColumnExtension;
+import com.db.annotation.TableExtension;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
 
-import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
-
+import java.util.List;
 /**
  * @author yuanmengfan
  * @date 2022/7/9 17:26
@@ -18,20 +18,19 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Table(name = "t_testModel")
-@TableExtension(remark = "测试表")
+@TableExtension(name =  "t_testModel",remark = "测试表")
 public class TestModel {
-    @TableExtension(isId = true)
+    @ColumnExtension(isId = true,length = 255)
     private String id;
-    @TableExtension(columnName = "userName",defaultValue = "name1", remark = "姓名")
+    @ColumnExtension(columnName = "userName",defaultValue = "name1", remark = "姓名")
     private String name;
-    @TableExtension(remark = "年龄", length = 10)
+    @ColumnExtension(remark = "年龄", length = 10)
     private int age;
-    @TableExtension(defaultValue = DefaultValues.NULL, remark = "工资")
+    @ColumnExtension(defaultValue = DefaultValues.NULL, remark = "工资")
     private Double salary;
-    @TableExtension(remark = "生日")
+    @ColumnExtension(remark = "生日")
     private Date birth;
-    @TableExtension(defaultValue=DefaultValues.TRUE,remark = "是否禁用")
+    @ColumnExtension(defaultValue=DefaultValues.TRUE,remark = "是否禁用")
     private boolean disabled;
 
     private LocalDate localDate;
@@ -39,4 +38,6 @@ public class TestModel {
     private LocalDateTime localDateTime;
 
     private LocalTime localTime;
+
+    private List<Date> list;
 }
