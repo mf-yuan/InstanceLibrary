@@ -17,7 +17,7 @@ public class PathUtil {
      * @author yuanmengfan
      * @date 2022/7/12 22:51
      */
-    public static String getAbsolutePath() {
+    public static String  getProjectPath(){
         // 发布到linux服务器中的路径会很奇怪
         // System.out.println(System.getProperty("user.dir"));
 
@@ -27,6 +27,4 @@ public class PathUtil {
     public static String getClassPath() {
         return Thread.currentThread().getContextClassLoader().getResource("").getPath();
     }
-
-
 }

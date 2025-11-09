@@ -1,6 +1,7 @@
 package com.util;
 
 import cn.hutool.core.util.StrUtil;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
@@ -12,6 +13,7 @@ import org.junit.platform.commons.util.StringUtils;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author yuanmengfan
@@ -21,90 +23,127 @@ import java.util.*;
 public class ExcelUtil {
 
 
-//    /**
-//     * 导出excel
-//     *
-//     * @param fileName 文件名
-//     * @param titles   表头名
-//     * @param mapList  数据
-//     * @param keys     对应表头的key
-//     * @return
-//     * @throws IOException
-//     */
-//    public FileVo exportExcel(String fileName, String[] titles, List<Entity> mapList, String[] keys) throws IOException {
-//        HSSFWorkbook hssfWorkbook = new HSSFWorkbook();
-//        HSSFSheet sheet = hssfWorkbook.createSheet();
-//        // 初始化样式
-//        sheet.setMargin(HSSFSheet.TopMargin, (double) 0.6); // 上边距
-//        sheet.setMargin(HSSFSheet.BottomMargin, (double) 0.2); // 下边距
-//
-//        int rownum = 0;
-//
-//        // 创建标题
-//        HSSFRow row = sheet.createRow(rownum++);
-//        row.setHeightInPoints(30);
-//        HSSFCell title = row.createCell(0);
-//        title.setCellValue(fileName);
-//        title.setCellStyle(initColumnHeadStyle(hssfWorkbook, true, 22));
-//
-//        // 合并标题
-//        CellRangeAddress region = new CellRangeAddress(0, 0, 0, titles.length);
-//        sheet.addMergedRegion(region);
-//
-//        // 创建表头
-//        row = sheet.createRow(rownum++);
-//        row.setHeightInPoints(22);
-//
-//        CellStyle titleCellStyle = initColumnHeadStyle(hssfWorkbook, true, 14);
-//        // 添加序
-//        HSSFCell cell = row.createCell(0);
-//        cell.setCellValue("序号");
-//        cell.setCellStyle(titleCellStyle);
-//
-//        sheet.setColumnWidth(0, 2000);
-//        for (int i = 0; i < titles.length; i++) {
-//            cell = row.createCell(i + 1);
-//            cell.setCellValue(titles[i]);
-//            cell.setCellStyle(titleCellStyle);
-//            sheet.setColumnWidth(i + 1, 8000);
-//        }
-//        CellStyle defaultCellStyle = initColumnCenterStyle(hssfWorkbook);
-//        // 把 maplist 中的数据都加载到 HssfWorkBook中
-//        for (int i = 0; i < mapList.size(); i++) {
-//            row = sheet.createRow(rownum++);
-//            // 序号值
-//            cell = row.createCell(0);
-//            cell.setCellValue(i + 1);
-//            cell.setCellStyle(defaultCellStyle);
-//            Entity map = mapList.get(i);
-//            for (int j = 0; j < keys.length; j++) {
-//                cell = row.createCell(j + 1);
-//                cell.setCellValue(map.getStr(keys[j]));
-//                cell.setCellStyle(defaultCellStyle);
-//            }
-//        }
-//
-//        // 创建一个File
-//        File file = new File(fileName + ".xls");
-//        OutputStream os = null;
-//        try {
-//            // 用 file取创建一个输出流
-//            os = new FileOutputStream(file);
-//            // 把hssfWorkbook 写入到 这个输出流中
-//            hssfWorkbook.write(os);
-//        } catch (Exception ex) {
-//            throw ex;
-//        } finally {
-//            try {
-//                os.flush();
-//                os.close();
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//                throw ex;
-//            }
-//        }
-//        return infoplusApi.uploadFile("https://ehall.hust.edu.cn/file", "a46b8ty00ed411e58d5e00163e02hl78", file.getAbsolutePath());
-//    }
+   /**
+     *
+     * @param templatePath      模板的路径
+     * @param dataList          数据
+     * @param keys              map的key需要按顺序
+     * @param fillDoneConsumer  数据填充完成后钩子
+     * @return
+    */
+    public Workbook exportTemplateWorkBook(String templatePath, List<Map<String,Object>> dataList
+            , String[] keys, Consumer<Workbook> fillDoneConsumer, Integer startRow,Integer startCol) {
+        Workbook workbook =  fileToWorkBook(templatePath);
+        Sheet sheet = workbook.getSheetAt(0);
+        int rownum = sheet.getPhysicalNumberOfRows();
+        if(startRow != null){
+            rownum = startRow;
+        }
+
+        Row row = null;
+        Cell cell = null;
+
+        CellStyle defaultCellStyle = initColumnCenterStyle(workbook);
+        // 把 maplist 中的数据都加载到 HssfWorkBook中
+        for (int i = 0; i < dataList.size(); i++) {
+            int currentRow = rownum++;
+            row = sheet.getRow(currentRow);
+            if(row == null){
+                row = sheet.createRow(currentRow);
+            }
+            Map<String,Object> map = dataList.get(i);
+            for (int j = 0; j < keys.length; j++) {
+                int colIndex = j + startCol;
+                cell = row.getCell(colIndex);
+                if(cell == null){
+                    cell= row.createCell(colIndex);
+                }
+                cell.setCellValue(map.getOrDefault(keys[j],"").toString());
+                cell.setCellStyle(defaultCellStyle);
+            }
+        }
+        if(fillDoneConsumer != null){
+            fillDoneConsumer.accept(workbook);
+        }
+        return workbook;
+    }
+    /**
+     *
+     * @param templatePath      模板的路径
+     * @param saveFilePath          导出的文件名称
+     * @param dataList          数据
+     * @param keys              map的key需要按顺序
+     * @param fillDoneConsumer  数据填充完成后钩子
+     * @return
+     */
+    public File exportTemplateFile(String templatePath, String saveFilePath, List<Map<String,Object>> dataList
+            , String[] keys, Consumer<Workbook> fillDoneConsumer, Integer startRow, Integer startCol){
+        Workbook workbook = exportTemplateWorkBook(templatePath, dataList, keys, fillDoneConsumer, startRow,startCol);
+        return workBookToFile(workbook,saveFilePath);
+    }
+
+    /**
+     * 基于数据导出
+     * @param titleName
+     * @param titles
+     * @param mapList
+     * @param keys
+     * @return
+     */
+    public static Workbook exportWorkBook(String titleName, String[] titles, List<Map<String,Object>> mapList, String[] keys) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        // 初始化样式
+        sheet.setMargin(HSSFSheet.TopMargin, 0.6); // 上边距
+        sheet.setMargin(HSSFSheet.BottomMargin, 0.2); // 下边距
+
+        int rownum = 0;
+
+        // 创建标题
+        Row row = sheet.createRow(rownum++);
+        row.setHeightInPoints(30);
+        Cell title = row.createCell(0);
+        title.setCellValue(titleName);
+        title.setCellStyle(initColumnHeadStyle(workbook, true, 22));
+
+        // 合并标题
+        CellRangeAddress region = new CellRangeAddress(0, 0, 0, titles.length);
+        sheet.addMergedRegion(region);
+
+        // 创建表头
+        row = sheet.createRow(rownum++);
+        row.setHeightInPoints(22);
+
+        CellStyle titleCellStyle = initColumnHeadStyle(workbook, true, 14);
+        // 添加序号
+        Cell cell = row.createCell(0);
+        cell.setCellValue("序号");
+        cell.setCellStyle(titleCellStyle);
+
+        sheet.setColumnWidth(0, 2000);
+        for (int i = 0; i < titles.length; i++) {
+            cell = row.createCell(i + 1);
+            cell.setCellValue(titles[i]);
+            cell.setCellStyle(titleCellStyle);
+            sheet.setColumnWidth(i + 1, 8000);
+        }
+        CellStyle defaultCellStyle = initColumnCenterStyle(workbook);
+        // 把 maplist 中的数据都加载到 WorkBook中
+        for (int i = 0; i < mapList.size(); i++) {
+            row = sheet.createRow(rownum++);
+            // 序号值
+            cell = row.createCell(0);
+            cell.setCellValue(i + 1);
+            cell.setCellStyle(defaultCellStyle);
+            Map<String,Object> map = mapList.get(i);
+            for (int j = 0; j < keys.length; j++) {
+                cell = row.createCell(j + 1);
+                cell.setCellValue(map.getOrDefault(keys[j],"").toString());
+                cell.setCellStyle(defaultCellStyle);
+            }
+        }
+        return workbook;
+    }
 
     public static List<Map<String, String>> readExcel(String filePath, String[] keys) {
         return readExcel(filePath, null, keys, 1, 0);
@@ -341,29 +380,33 @@ public class ExcelUtil {
         return columnHeadStyle;
     }
 
-    public static File workToFile(Workbook workbook, String fileName) throws IOException {
-        File file = new File(fileName + ".xlsx");
+    public static File workBookToFile(Workbook workbook,String saveFilePath) {
+        if (workbook instanceof HSSFWorkbook) {
+            saveFilePath += ".xls";
+        } else if (workbook instanceof XSSFWorkbook) {
+            saveFilePath += ".xlsx";
+        }
+        File file = new File(saveFilePath);
         OutputStream os = null;
         try {
             // 用 file取创建一个输出流
             os = new FileOutputStream(file);
-            // 把Workbook 写入到 这个输出流中
+            // 把 Workbook 写入到 这个输出流中
             workbook.write(os);
-        } catch (IOException ex) {
+            return file;
+        } catch (Exception ex) {
             ex.printStackTrace();
-            throw ex;
         } finally {
-            try {
-                if (os != null) {
+            if(os !=null){
+                try {
                     os.flush();
                     os.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                throw ex;
             }
         }
-        return file;
+        return null;
     }
 
 
