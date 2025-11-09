@@ -1,8 +1,8 @@
 package com.db.build.sql.mysql;
 
 import cn.hutool.core.util.StrUtil;
+import com.constants.DefaultValueConstants;
 import com.db.DbType;
-import com.db.DefaultValues;
 import com.db.FieldToColumnType;
 import com.db.annotation.ColumnExtension;
 import com.db.build.sql.ContextBuilder;
@@ -44,7 +44,7 @@ public class MySQLContextBuilder implements ContextBuilder {
             ColumnExtension extension = field.getAnnotation(ColumnExtension.class);
             if (extension != null) {
                 // 扩展属性的 isNotNull 为true 时defaultValue不能为 DefaultValues.NULL
-                if (extension.isNotNull() && extension.defaultValue().equals(DefaultValues.NULL))
+                if (extension.isNotNull() && extension.defaultValue().equals(DefaultValueConstants.NULL))
                     throw new RuntimeException("Field " + fieldName +
                             "! When Extension IsNotNull are true, DefaultValue cannot be DefaultValues.NULL.");
                 fieldName = ModelToTableUtils.getFieldName(field);

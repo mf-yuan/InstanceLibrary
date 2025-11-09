@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author yuanmengfan
@@ -108,6 +110,8 @@ public class SqlUtils {
                     case "createDate":
                     case "updateDate":
                         entity.set(field.getName(), LocalDateTime.now());
+                        break;
+                    default:
                         break;
                 }
             } else {
