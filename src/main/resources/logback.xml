@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 配置文件每隔1分钟，就检查更新 -->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!--SpringBoot的三个自定义转换器-->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!--SpringBoot 默认日志输出格式-->
+    <property name="log.console_pattern" value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <!--file 日志格式-->
+    <property name="log.file_pattern" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <!--日志存放文件夹-->
+    <property name="log.dir" value="${catalina.base:-.}/logs"/>
+    <!--日志最大存放天数-->
+    <property name="log.maxHistory" value="30"/>
+    <!-- 项目名称 需要在pom文件中设置name 默认为manage -->
+    <property name="project_name" value="${pom.name:-manage}"/>
+
+
+
+    <!-- ch.qos.logback.core.ConsoleAppender 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 过去使用layout，现在都推荐使用encoder
+             作用一：将日志信息转换（格式化）为字符串
+             作用二：然后写入到文件中-->
+        <encoder>
+            <pattern>${log.console_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ch.qos.logback.core.rolling.RollingFileAppender 文件日志输出到文件 -->
+    <!-- 1.日志的设置 -->
+    <appender name="fileAppender"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 例如当天，也就是今天是2020-2-10，那么在这天生成的日志文件路径为${log.filePath}/${project_name}.log
+             接着到了明天，也就是2019-2-11，这天生成的日志文件路径为${log.filePath}/${project_name}.log，
+             但昨天2020-2-10，生成的日志文件路径就变为${log.filePath}/${project_name}-2020-2-10.log.gz(压缩文件) -->
+
+        <!-- 当天生成的日志文件的路径 -->
+        <file>${log.dir}/${project_name}.log</file>
+        <!-- 设置基于时间(每天)的滚动策略，也就是将日志内容按照日期来写入到相应的文件中-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 当天之前的每天生成的日志文件的路径 -->
+            <fileNamePattern>${log.dir}/${project_name}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <!-- 最大历史保存文件的数量，只保存最近30天的日志文件，超出的会被删除-->
+            <maxHistory>${log.maxHistory}</maxHistory>
+        </rollingPolicy>
+        <!-- 过去使用layout，现在都推荐使用encoder
+             作用一：将日志信息转换（格式化）为字符串
+             作用二：然后写入到文件中-->
+        <encoder>
+            <pattern>${log.file_pattern}</pattern>
+        </encoder>
+        <!--        &lt;!&ndash; 过滤掉非debug级别的信息 &ndash;&gt;-->
+        <!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+        <!--            <level>DEBUG</level>-->
+        <!--            <onMatch>DENY</onMatch>-->
+        <!--            &lt;!&ndash; 作用是拒绝写入所有与<level>不匹配的日志信息，-->
+        <!--            也就是非debug级别的日志信息都不会被写入到日志文件中 &ndash;&gt;-->
+        <!--            <onMismatch>ACCEPT</onMismatch>-->
+        <!--        </filter>-->
+    </appender>
+
+    <!-- 启用 fileAppender与console -->
+    <root level="info">
+        <appender-ref ref="fileAppender"/>
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
