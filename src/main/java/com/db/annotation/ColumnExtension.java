@@ -1,7 +1,7 @@
 package com.db.annotation;
 
 
-import com.db.DefaultValues;
+import com.constants.DefaultValueConstants;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -33,7 +33,7 @@ public @interface ColumnExtension {
     boolean isNotNull() default false;
 
     // 字段的默认值
-    String defaultValue() default DefaultValues.NONE;
+    String defaultValue() default DefaultValueConstants.NONE;
 
     // 字段的注释
     String remark() default "";
