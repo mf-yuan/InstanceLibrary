@@ -20,4 +20,4 @@ readOnly = false
 [group_test]
 url=jdbc:mysql://localhost:3306/test?serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&allowMultiQueries=true
 username=root
-password=70wzdxhn
+password=123456
