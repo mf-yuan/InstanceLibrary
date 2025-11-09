@@ -22,7 +22,9 @@ public class FieldUtils {
 
     private static List<Field> getBaseOrListFields(Class<?> clazz,boolean isBase){
         return Arrays.stream(clazz.getDeclaredFields())
-                .filter(isBase ? filterFieldPredicate() : Predicate.not(filterFieldPredicate()))
+                .filter(isBase ? filterFieldPredicate() : filterFieldPredicate().negate())
+                // 兼容Java1.8
+//                .filter(isBase ? filterFieldPredicate() : Predicate.not(filterFieldPredicate()))
                 .collect(Collectors.toList());
     }
     /**
