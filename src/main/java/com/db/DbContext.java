@@ -30,7 +30,7 @@ public class DbContext {
     private SqlUtils sqlUtils = new SqlUtils();
 
     public int executeNoQuery(SqlEntity sqlEntity) throws SQLException {
-        return db.execute(sqlEntity.getSql(), sqlEntity.getParams());
+        return session.execute(sqlEntity.getSql(), sqlEntity.getParams());
     }
 
     public Entity find(SqlEntity sqlEntity) throws SQLException {
@@ -62,7 +62,7 @@ public class DbContext {
     public int add(Object... obj) throws SQLException {
         final int[] record = {0};
         if (ArrayUtil.isNotEmpty(obj)) {
-            db.tx(parameter -> {
+            session.tx(parameter -> {
                 for (Object model : obj) {
                     if (null != model) {
                         Entity entity = sqlUtils.generateEntity(model);
@@ -79,7 +79,7 @@ public class DbContext {
         final int[] record = {0};
         if (obj != null) {
             List<Entity> entityList = sqlUtils.generateEntityExtensionList(obj);
-            db.tx(parameter -> {
+            session.tx(parameter -> {
                 for (Entity entity : entityList) {
                     logger.info(entity.toString());
                     record[0] += parameter.insert(entity);
