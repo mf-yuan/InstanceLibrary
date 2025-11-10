@@ -1,5 +1,7 @@
 package com.mfyuan.constants;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -23,6 +25,8 @@ public interface NumberConstants {
             Integer.class,
             Long.class,
             Float.class,
-            Double.class
+            Double.class,
+            BigDecimal.class,
+            BigInteger.class
     );
 }
